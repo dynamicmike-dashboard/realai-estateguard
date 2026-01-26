@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navigation from './components/Navigation';
 import DashboardStats from './components/DashboardStats';
 import PropertyCard from './components/PropertyCard';
@@ -9,11 +9,32 @@ import Kanban from './components/Kanban';
 import Settings from './components/Settings';
 import PropertyDetails from './components/PropertyDetails';
 import { PropertySchema, Lead, PropertyTier, AgentSettings, LeadStatus } from './types';
+// Antigravity provisions this library automatically via this import
+import { createClient } from '@supabase/supabase-js';
+
+// --- SUPABASE INSTANTIATION ---
+// Pulling from your .env.local file
+const SUPABASE_URL = process.env.NEXT_SUPABASE_URL || 'https://qrydrfgrwzjewkjennli.supabase.co';
+const SUPABASE_ANON_KEY = process.env.NEXT_SUPABASE_ANON_KEY || ''; 
+
+// We declare it ONCE here as 'let' so it can be assigned conditionally
+let supabase: any = null;
+
+if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.length > 0) {
+  try {
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } catch (e) {
+    console.error("Supabase init failed:", e);
+  }
+} else {
+  console.error("Supabase Key missing! Dashboard running in Offline Mode.");
+}
 
 const INITIAL_SETTINGS: AgentSettings = {
   businessName: 'EstateGuard AI',
   primaryColor: '#d4af37',
-  apiKey: process.env.API_KEY || '',
+  // Updated to the NEXT_PUBLIC prefix so the browser can access it on Vercel
+  apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '', 
   highSecurityMode: true,
   subscriptionTier: 'Enterprise',
   monthlyPrice: 0,
@@ -77,27 +98,63 @@ const App: React.FC = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [notifications, setNotifications] = useState(0);
 
-  // Derive selected property from state to ensure updates reflect immediately in the modal
+  // Helper to map DB columns to your Lead Type
+  const mapLead = (d: any): Lead => ({
+    id: d.id,
+    name: d.lead_name || "New Prospect",
+    phone: d.lead_phone || "N/A",
+    financing_status: 'Unverified',
+    property_id: 'General',
+    property_address: d.property_address || "N/A",
+    status: (d.status as LeadStatus) || 'New',
+    timestamp: d.created_at,
+    notes: [d.chat_summary || ""]
+  });
+
+  // --- SYNC & REALTIME SUBSCRIPTION ---
+  useEffect(() => {
+    const initSync = async () => {
+      // 1. Initial Load of existing leads from Supabase
+      const { data } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
+      
+      if (data) setLeads(data.map(mapLead));
+
+      // 2. Realtime Listener: This makes the "Priority Leads" pill pop up instantly
+      const channel = supabase.channel('schema-db-changes')
+        .on('postgres_changes',{ event: 'INSERT', schema: 'public', table: 'leads' },(payload) => {
+            // When a new row hits Supabase, update the local state immediately
+            setLeads((prev) => [mapLead(payload.new), ...prev]);
+            setNotifications((prev) => prev + 1);
+          }).subscribe();
+
+      return () => { supabase.removeChannel(channel); };
+    };
+    initSync();
+  }, []);
+
   const selectedProperty = properties.find(p => p.property_id === selectedPropertyId) || null;
 
-  const handleStatusChange = (id: string, newStatus: LeadStatus) => {
+  const handleStatusChange = async (id: string, newStatus: LeadStatus) => {
+    await supabase.from('leads').update({ status: newStatus }).eq('id', id);
     setLeads(prev => prev.map(l => l.id === id ? {...l, status: newStatus} : l));
   };
 
-  const handleCaptureLead = (leadPart: Partial<Lead>) => {
-    const newLead: Lead = {
-      id: `L-${Date.now()}`,
-      name: leadPart.name || "New Prospect",
-      phone: leadPart.phone || "N/A",
-      financing_status: leadPart.financing_status || 'Unverified',
-      property_id: leadPart.property_id || "General",
+  const handleCaptureLead = async (leadPart: Partial<Lead>) => {
+    // We insert to Supabase; the Realtime Listener above updates the UI 
+    if (!supabase) {
+      console.error("Cannot capture lead: Supabase is not initialized.");
+      return;
+    }
+
+const { error } = await supabase.from('leads').insert([{
+      lead_name: leadPart.name || "New Prospect",
+      lead_phone: leadPart.phone || "N/A",
       property_address: leadPart.property_address || "N/A",
-      status: 'New',
-      timestamp: new Date().toISOString(),
-      notes: leadPart.notes || []
-    };
-    setLeads(prev => [newLead, ...prev]);
-    setNotifications(prev => prev + 1);
+      chat_summary: leadPart.notes?.[0] || "Captured via AI Concierge",
+      status: 'New'
+    }]);
+    
+    if (error) console.error("Supabase Save Error:", error.message);
   };
 
   const updateProperty = (updated: PropertySchema) => {
@@ -173,7 +230,7 @@ const App: React.FC = () => {
       <Navigation activeTab={activeTab} setActiveTab={setActiveTab} brandColor={settings.primaryColor} />
 
       <main className="flex-1 overflow-y-auto main-content no-scrollbar flex flex-col">
-        {/* PWA Install Notification - Focused on Mobile Instructions */}
+        {/* PWA Install Notification */}
         <div className="fixed top-6 right-8 z-[60] hidden md:block">
            <div className="pwa-install-pill" onClick={() => setModalContent({title: 'Elite Agent Dashboard Installation', content: <div className="text-center p-4">
                <div className="bg-slate-950 p-10 rounded-[2.5rem] mb-8 border border-gold/20 shadow-2xl">
@@ -230,11 +287,14 @@ const App: React.FC = () => {
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-[10px] font-black text-gold uppercase tracking-[0.2em]">{settings.businessName}</span>
                 {notifications > 0 && (
-                    <div className="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg shadow-red-500/30 animate-in zoom-in">
-                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
-                        {notifications} PRIORITY LEADS
-                    </div>
-                )}
+    <div 
+        className="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg shadow-red-500/30 animate-in zoom-in cursor-pointer"
+        onClick={() => { setActiveTab('leads'); setNotifications(0); }}
+    >
+        <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
+        {notifications} PRIORITY LEADS - VIEW PIPELINE
+    </div>
+ )}
               </div>
               <h2 className="text-4xl font-luxury font-bold text-slate-950">
                 {activeTab === 'dashboard' && 'Market Command'}
@@ -300,10 +360,10 @@ const App: React.FC = () => {
                                 <div className="flex items-center justify-between gap-10">
                                     <div className="flex-1">
                                         <p className="font-bold text-slate-950 text-xl flex items-center gap-3">
-                                           Estate Guard Protocol
-                                           <span className={`text-[10px] px-3 py-1 rounded-full font-black ${settings.highSecurityMode ? 'bg-gold/20 text-gold shadow-lg shadow-gold/10' : 'bg-slate-200 text-slate-500'}`}>
+                                            Estate Guard Protocol
+                                            <span className={`text-[10px] px-3 py-1 rounded-full font-black ${settings.highSecurityMode ? 'bg-gold/20 text-gold shadow-lg shadow-gold/10' : 'bg-slate-200 text-slate-500'}`}>
                                               {settings.highSecurityMode ? 'SECURE' : 'OPEN'}
-                                           </span>
+                                            </span>
                                         </p>
                                         <p className="text-sm text-slate-600 mt-4 leading-relaxed font-medium">
                                            When active, the AI concierge will gate sensitive specifics (appraisals, notes) until lead qualification is verified.
@@ -327,9 +387,9 @@ const App: React.FC = () => {
                               Concierge Sandbox
                            </p>
                            <AgentChat 
-                               property={selectedProperty || properties[0]} 
-                               onLeadCaptured={handleCaptureLead} 
-                               settings={settings}
+                                property={selectedProperty || properties[0]} 
+                                onLeadCaptured={handleCaptureLead} 
+                                settings={settings}
                            />
                         </div>
                     </div>
