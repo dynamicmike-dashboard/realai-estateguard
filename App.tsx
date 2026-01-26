@@ -14,8 +14,8 @@ import { createClient } from '@supabase/supabase-js';
 
 // --- SUPABASE INSTANTIATION ---
 // Pulling from your .env.local file
-const SUPABASE_URL = process.env.NEXT_SUPABASE_URL || 'https://qrydrfgrwzjewkjennli.supabase.co';
-const SUPABASE_ANON_KEY = process.env.NEXT_SUPABASE_ANON_KEY || ''; 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://qrydrfgrwzjewkjennli.supabase.co';
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''; 
 
 // We declare it ONCE here as 'let' so it can be assigned conditionally
 let supabase: any = null;
