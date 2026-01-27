@@ -34,32 +34,26 @@ function extractJson(text: string): any {
 }
 
 // --- PROPERTY DATA SCRAPER ---
+
 export const parsePropertyData = async (input: string, apiKey?: string): Promise<any> => {
-  const activeKey = getApiKey(apiKey);
+  const activeKey = apiKey || (import.meta as any).env?.VITE_GOOGLE_API_KEY || '';
   const genAI = new GoogleGenerativeAI(activeKey);
   
-  // FIX: Force 'v1' API version to resolve the 404 "model not found" error
+  // UPDATED MODEL ID: Verified from your ListModels output
   const model = genAI.getGenerativeModel(
-    { model: 'gemini-1.5-flash-latest' }, 
-    { apiVersion: 'v1' }
+    { model: 'gemini-2.5-flash' }, 
+    { apiVersion: 'v1' } 
   );
 
-  const prompt = `
-    SYSTEM: ${SCRAPER_SYSTEM_INSTRUCTION}
-    USER REQUEST: Extract property data from: "${input}". 
-    REQUIREMENTS: Return ONLY a valid JSON object with: address, price, bedrooms, bathrooms, sq_ft, hero_narrative.
-  `;
+  const prompt = `Extract property data as JSON from: "${input}". 
+  Required fields: address, price, bedrooms, bathrooms, sq_ft, hero_narrative.`;
 
   try {
     const result = await model.generateContent(prompt);
     const text = result.response.text();
+    const data = extractJson(text); // Use the helper we added earlier
     
-    // Use resilient extractor to handle markdown formatting
-    const data = extractJson(text);
-    
-    if (!data.property_id) {
-      data.property_id = `EG-${Math.floor(Math.random() * 1000)}`;
-    }
+    if (!data.property_id) data.property_id = `EG-${Math.floor(Math.random() * 1000)}`;
     return data;
   } catch (e) {
     console.error("[DEBUG] Gemini Execution Error:", e);

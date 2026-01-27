@@ -57,8 +57,8 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) =>
       {/* Heatmap Section */}
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
         <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">Lead Acquisition Heatmap</h3>
-        {/* FIXED: Applied explicit minHeight and minWidth to ensure container size is available for Recharts */}
-        <div className="h-64 w-full flex items-center justify-center" style={{ minHeight: '256px', minWidth: '100%' }}>
+        {/* FIXED: Explicit height and min-height to prevent width(-1) warnings */}
+        <div className="w-full h-[300px] min-h-[300px] flex items-center justify-center">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data}>
               <defs>
@@ -80,8 +80,8 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) =>
       {/* Intensity Section */}
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
         <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">Asset Interaction Intensity</h3>
-        {/* FIXED: Added explicit dimensions to prevent Recharts layout warnings */}
-        <div className="h-64 w-full flex items-center justify-center" style={{ minHeight: '256px', minWidth: '100%' }}>
+        {/* FIXED: Explicit dimensions added here as well */}
+        <div className="w-full h-[300px] min-h-[300px] flex items-center justify-center">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={properties.slice(0, 5).map(p => ({ name: p.property_id || p.id, hits: Math.floor(Math.random() * 80) + 20 }))}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
