@@ -338,7 +338,8 @@ const { error } = await supabase.from('leads').insert([{
             )}
             {activeTab === 'leads' && <Kanban leads={leads} onStatusChange={handleStatusChange} />}
             {activeTab === 'ingestion' && <IngestionPortal onPropertyAdded={(p) => { setProperties([p, ...properties]); setActiveTab('properties'); }} />}
-            {activeTab === 'settings' && <Settings settings={settings} onUpdate={setSettings} />}
+           apiKey={GOOGLE_API_KEY} // <-- Pass the key here
+ {activeTab === 'settings' && <Settings settings={settings} onUpdate={setSettings} />}
             {activeTab === 'chat' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                     <div className="lg:col-span-7 space-y-12">

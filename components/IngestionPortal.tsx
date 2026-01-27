@@ -5,9 +5,10 @@ import { PropertySchema } from '../types';
 
 interface IngestionPortalProps {
   onPropertyAdded: (p: PropertySchema) => void;
+apiKey: string; // <-- Add this
 }
 
-const IngestionPortal: React.FC<IngestionPortalProps> = ({ onPropertyAdded }) => {
+const IngestionPortal: React.FC<IngestionPortalProps> = ({ onPropertyAdded, apiKey }) => {
   const [activeMode, setActiveMode] = useState<'url' | 'text' | 'voice'>('url');
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,12 +19,13 @@ const IngestionPortal: React.FC<IngestionPortalProps> = ({ onPropertyAdded }) =>
   const handleProcess = async () => {
     if (!inputValue && activeMode !== 'voice') return;
     setLoading(true);
+
     try {
-      const parsed = await parsePropertyData(inputValue);
-      onPropertyAdded(parsed);
-      setInputValue('');
-      // Beautiful success alert replacement logic could go here, for now alert is fine
-    } catch (error) {
+      // Pass the apiKey into the function here
+    const parsed = await parsePropertyData(inputValue, apiKey); 
+    onPropertyAdded(parsed);
+    setInputValue('');
+  } catch (error) {
       console.error(error);
       alert("Intelligence sync failed. Please verify the source data and try again.");
     } finally {
