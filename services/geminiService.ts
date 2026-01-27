@@ -18,52 +18,50 @@ const hydrateInstruction = (settings: AgentSettings) => {
     .replace(/{SPECIALTIES}/g, settings.specialties?.join(", ") || "Luxury Real Estate");
 };
 
+
+
+
+
+
 export const parsePropertyData = async (input: string, apiKey?: string): Promise<PropertySchema> => {
   const activeKey = getApiKey(apiKey);
   const genAI = new GoogleGenerativeAI(activeKey);
+  
+  // Use 1.5-flash for speed and standard compatibility
   const model = genAI.getGenerativeModel({ 
     model: 'gemini-1.5-flash',
-    systemInstruction: SCRAPER_SYSTEM_INSTRUCTION 
   });
 
-  const isUrl = input.trim().startsWith('http');
-  
-  const prompt = `DATA SOURCE: "${input}"
-COMMAND:
-1. Extract ALL available property details.
-2. If this is a URL, visit the page and find: Address, Full Price, Bedroom count, Bathroom count, Square Footage, and a 2-3 sentence descriptive summary.
-3. ADHERE TO THE GROUNDING PROTOCOL: If any field (like Price or Sq Ft) is not explicitly found, set it to 0. If Bed/Bath is missing, set to null.
-4. DO NOT HALLUCINATE OR GUESS.`;
-
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: {
-      responseMimeType: "application/json",
-      // Restoring the full schema logic for production accuracy
-    }
-  });
+  const prompt = `
+    SYSTEM: ${SCRAPER_SYSTEM_INSTRUCTION}
+    
+    USER REQUEST: Extract property data from this source: "${input}"
+    
+    REQUIREMENTS:
+    1. Extract: Address, Price, Bedrooms, Bathrooms, Sq Ft, and a 2-3 sentence Hero Narrative.
+    2. If numeric values are missing, return 0.
+    3. Return ONLY a valid JSON object matching the PropertySchema.
+  `;
 
   try {
+    const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-    // Clean potential markdown artifacts
+    
+    // Clean markdown and parse
     const cleanedJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
     const data = JSON.parse(cleanedJson) as PropertySchema;
     
-    // Safety Fallbacks for UI Stability
+    // Final UI data safety check
     if (!data.property_id) data.property_id = `EG-${Math.floor(Math.random() * 1000)}`;
-    if (!data.status) data.status = 'Active';
-    if (!data.category) data.category = 'Residential';
-    if (!data.listing_details) {
-      data.listing_details = { address: "Unknown", price: 0, hero_narrative: "" };
-    }
-    
     return data;
   } catch (e) {
-    console.error("Scraper JSON Error:", e);
-    throw new Error("Synchronization interrupted. The source data was non-standard.");
+    console.error("Gemini Execution Error:", e);
+    throw new Error("Intelligence sync failed. Please verify the source data and try again.");
   }
 };
+
+
 
 export const chatWithGuard = async (
   history: any[],
