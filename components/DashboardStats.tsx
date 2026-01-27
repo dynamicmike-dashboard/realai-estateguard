@@ -56,7 +56,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) =>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
           <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">Lead Acquisition Heatmap</h3>
-          <div className="h-64">
+          <div className="h-64 w-full" style={{ minHeight: '256px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data}>
                 <defs>
