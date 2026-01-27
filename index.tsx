@@ -1,4 +1,4 @@
-
+import './index.css'; // This line connects your Tailwind styles to the app
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
