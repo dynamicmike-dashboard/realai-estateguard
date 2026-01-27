@@ -126,24 +126,24 @@ const App: React.FC = () => {
 
   // --- SYNC & REALTIME SUBSCRIPTION ---
   useEffect(() => {
-    const initSync = async () => {
-      // 1. Initial Load of existing leads from Supabase
-      const { data } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
-      
-      if (data) setLeads(data.map(mapLead));
+    const initSync = async () => {
+      // 1. Initial Load of existing leads from Supabase
+      const { data } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
+      
+      if (data) setLeads(data.map(mapLead));
 
-      // 2. Realtime Listener: This makes the "Priority Leads" pill pop up instantly
-      const channel = supabase.channel('schema-db-changes')
-        .on('postgres_changes',{ event: 'INSERT', schema: 'public', table: 'leads' },(payload) => {
+      // 2. Realtime Listener: This makes the "Priority Leads" pill pop up instantly
+      const channel = supabase.channel('schema-db-changes')
+        .on('postgres_changes',{ event: 'INSERT', schema: 'public', table: 'leads' },(payload: any) => {
             // When a new row hits Supabase, update the local state immediately
-            setLeads((prev) => [mapLead(payload.new), ...prev]);
-            setNotifications((prev) => prev + 1);
-          }).subscribe();
+            setLeads((prev) => [mapLead(payload.new), ...prev]);
+            setNotifications((prev) => prev + 1);
+          }).subscribe();
 
-      return () => { supabase.removeChannel(channel); };
-    };
-    initSync();
-  }, []);
+      return () => { supabase.removeChannel(channel); };
+    };
+    initSync();
+  }, []);
 
   const selectedProperty = properties.find(p => p.property_id === selectedPropertyId) || null;
 
@@ -159,7 +159,7 @@ const App: React.FC = () => {
       return;
     }
 
-const { error } = await supabase.from('leads').insert([{
+    const { error } = await supabase.from('leads').insert([{
       lead_name: leadPart.name || "New Prospect",
       lead_phone: leadPart.phone || "N/A",
       property_address: leadPart.property_address || "N/A",
@@ -300,14 +300,14 @@ const { error } = await supabase.from('leads').insert([{
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-[10px] font-black text-gold uppercase tracking-[0.2em]">{settings.businessName}</span>
                 {notifications > 0 && (
-    <div 
-        className="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg shadow-red-500/30 animate-in zoom-in cursor-pointer"
-        onClick={() => { setActiveTab('leads'); setNotifications(0); }}
-    >
-        <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
-        {notifications} PRIORITY LEADS - VIEW PIPELINE
-    </div>
- )}
+                  <div 
+                      className="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-bold shadow-lg shadow-red-500/30 animate-in zoom-in cursor-pointer"
+                      onClick={() => { setActiveTab('leads'); setNotifications(0); }}
+                  >
+                      <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
+                      {notifications} PRIORITY LEADS - VIEW PIPELINE
+                  </div>
+                )}
               </div>
               <h2 className="text-4xl font-luxury font-bold text-slate-950">
                 {activeTab === 'dashboard' && 'Market Command'}
@@ -337,9 +337,18 @@ const { error } = await supabase.from('leads').insert([{
                 </div>
             )}
             {activeTab === 'leads' && <Kanban leads={leads} onStatusChange={handleStatusChange} />}
-            {activeTab === 'ingestion' && <IngestionPortal onPropertyAdded={(p) => { setProperties([p, ...properties]); setActiveTab('properties'); }} />}
-           apiKey={GOOGLE_API_KEY} // <-- Pass the key here
- {activeTab === 'settings' && <Settings settings={settings} onUpdate={setSettings} />}
+            
+            {activeTab === 'ingestion' && (
+              <IngestionPortal 
+                onPropertyAdded={(p) => { 
+                  setProperties([p, ...properties]); 
+                  setActiveTab('properties'); 
+                }} 
+                apiKey={GOOGLE_API_KEY} 
+              />
+            )}
+
+            {activeTab === 'settings' && <Settings settings={settings} onUpdate={setSettings} />}
             {activeTab === 'chat' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                     <div className="lg:col-span-7 space-y-12">
