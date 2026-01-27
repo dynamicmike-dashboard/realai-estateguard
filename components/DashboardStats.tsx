@@ -57,7 +57,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) =>
       {/* Heatmap Section */}
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
         <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">Lead Acquisition Heatmap</h3>
-        {/* FIXED: Applied flex, minHeight, and minWidth to ensure container size is calculated before chart render */}
+        {/* FIXED: Applied explicit minHeight and minWidth to ensure container size is available for Recharts */}
         <div className="h-64 w-full flex items-center justify-center" style={{ minHeight: '256px', minWidth: '100%' }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data}>
@@ -83,7 +83,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) =>
         {/* FIXED: Added explicit dimensions to prevent Recharts layout warnings */}
         <div className="h-64 w-full flex items-center justify-center" style={{ minHeight: '256px', minWidth: '100%' }}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={properties.slice(0, 5).map(p => ({ name: p.property_id, hits: Math.floor(Math.random() * 80) + 20 }))}>
+            <BarChart data={properties.slice(0, 5).map(p => ({ name: p.property_id || p.id, hits: Math.floor(Math.random() * 80) + 20 }))}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} />
               <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} />
