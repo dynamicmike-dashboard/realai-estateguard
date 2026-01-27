@@ -12,12 +12,24 @@ import { PropertySchema, Lead, PropertyTier, AgentSettings, LeadStatus } from '.
 // Antigravity provisions this library automatically via this import
 import { createClient } from '@supabase/supabase-js';
 
-// --- SUPABASE INSTANTIATION ---
-// Pulling from your .env.local file
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://qrydrfgrwzjewkjennli.supabase.co';
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''; 
+// --- SUPABASE & AI CONFIGURATION ---
+// This block safely checks for both Vercel (NEXT_PUBLIC) and Vite (VITE) prefixes
+const SUPABASE_URL = 
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 
+  (import.meta as any).env?.VITE_SUPABASE_URL || 
+  'https://qrydrfgrwzjewkjennli.supabase.co';
 
-// We declare it ONCE here as 'let' so it can be assigned conditionally
+const SUPABASE_ANON_KEY = 
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 
+  (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 
+  ''; 
+
+const GOOGLE_API_KEY = 
+  process.env.NEXT_PUBLIC_GOOGLE_API_KEY || 
+  (import.meta as any).env?.VITE_GOOGLE_API_KEY || 
+  '';
+
+// --- SUPABASE INSTANTIATION ---
 let supabase: any = null;
 
 if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.length > 0) {
@@ -30,11 +42,11 @@ if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.length > 0) {
   console.error("Supabase Key missing! Dashboard running in Offline Mode.");
 }
 
+// --- INITIAL APP SETTINGS ---
 const INITIAL_SETTINGS: AgentSettings = {
   businessName: 'EstateGuard AI',
   primaryColor: '#d4af37',
-  // Updated to the NEXT_PUBLIC prefix so the browser can access it on Vercel
-  apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY || '', 
+  apiKey: GOOGLE_API_KEY, 
   highSecurityMode: true,
   subscriptionTier: 'Enterprise',
   monthlyPrice: 0,
