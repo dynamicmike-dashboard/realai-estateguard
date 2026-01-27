@@ -46,6 +46,7 @@ if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.length > 0) {
 const INITIAL_SETTINGS: AgentSettings = {
   businessName: 'EstateGuard AI',
   primaryColor: '#d4af37',
+  // Use the pre-defined GOOGLE_API_KEY variable from the top of your file
   apiKey: GOOGLE_API_KEY, 
   highSecurityMode: true,
   subscriptionTier: 'Enterprise',
