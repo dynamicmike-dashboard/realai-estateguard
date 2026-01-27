@@ -24,10 +24,18 @@ const SUPABASE_ANON_KEY =
   (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 
   ''; 
 
-const GOOGLE_API_KEY = 
-  process.env.NEXT_PUBLIC_GOOGLE_API_KEY || 
-  (import.meta as any).env?.VITE_GOOGLE_API_KEY || 
-  '';
+
+
+
+// --- VITE-ONLY KEY RETRIEVAL ---
+const GOOGLE_API_KEY = (import.meta as any).env?.VITE_GOOGLE_API_KEY || '';
+
+// Diagnostic log to see in your Vercel browser console
+console.log("[DEBUG] API Key detected:", !!GOOGLE_API_KEY, "Length:", GOOGLE_API_KEY?.length);
+
+
+
+
 
 // --- SUPABASE INSTANTIATION ---
 let supabase: any = null;

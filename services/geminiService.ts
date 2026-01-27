@@ -22,45 +22,53 @@ const hydrateInstruction = (settings: AgentSettings) => {
 
 
 
-
-export const parsePropertyData = async (input: string, apiKey?: string): Promise<PropertySchema> => {
-  const activeKey = getApiKey(apiKey);
-  const genAI = new GoogleGenerativeAI(activeKey);
+// ADD THIS HELPER at the top of your geminiService.ts file
+function extractJson(text: string): any {
+  const fencedMatch = text.match(/```json([\s\S]*?)```/i) || text.match(/```([\s\S]*?)```/);
+  const jsonCandidate = (fencedMatch ? fencedMatch[1] : text).trim();
   
-  // Use 1.5-flash for speed and standard compatibility
-  const model = genAI.getGenerativeModel({ 
-    model: 'gemini-1.5-flash',
-  });
+  const firstBrace = jsonCandidate.indexOf("{");
+  const lastBrace = jsonCandidate.lastIndexOf("}");
+  
+  if (firstBrace === -1 || lastBrace === -1) throw new Error("No JSON found");
+  
+  const sliced = jsonCandidate.slice(firstBrace, lastBrace + 1);
+  return JSON.parse(sliced);
+}
+
+// THE UPDATED FUNCTION
+export const parsePropertyData = async (input: string, apiKey?: string): Promise<PropertySchema> => {
+  const activeKey = apiKey || (import.meta as any).env?.VITE_GOOGLE_API_KEY || '';
+  
+  if (!activeKey) {
+    console.error("[DEBUG] Missing API Key in Service");
+    throw new Error("Missing API Key");
+  }
+
+  const genAI = new GoogleGenerativeAI(activeKey);
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
   const prompt = `
     SYSTEM: ${SCRAPER_SYSTEM_INSTRUCTION}
-    
-    USER REQUEST: Extract property data from this source: "${input}"
-    
-    REQUIREMENTS:
-    1. Extract: Address, Price, Bedrooms, Bathrooms, Sq Ft, and a 2-3 sentence Hero Narrative.
-    2. If numeric values are missing, return 0.
-    3. Return ONLY a valid JSON object matching the PropertySchema.
+    USER REQUEST: Extract property data from: "${input}"
+    REQUIREMENTS: Return ONLY a valid JSON object with: address, price, bedrooms, bathrooms, sq_ft, hero_narrative.
   `;
 
   try {
     const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const text = result.response.text();
+    console.log("[DEBUG] Raw Gemini response received");
     
-    // Clean markdown and parse
-    const cleanedJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    const data = JSON.parse(cleanedJson) as PropertySchema;
+    // Use the resilient extractor instead of bare JSON.parse
+    const data = extractJson(text);
     
-    // Final UI data safety check
     if (!data.property_id) data.property_id = `EG-${Math.floor(Math.random() * 1000)}`;
     return data;
   } catch (e) {
-    console.error("Gemini Execution Error:", e);
+    console.error("[DEBUG] Gemini Execution Error:", e);
     throw new Error("Intelligence sync failed. Please verify the source data and try again.");
   }
 };
-
 
 
 export const chatWithGuard = async (
