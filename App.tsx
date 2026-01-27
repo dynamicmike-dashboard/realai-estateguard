@@ -13,7 +13,6 @@ import { PropertySchema, Lead, PropertyTier, AgentSettings, LeadStatus } from '.
 import { createClient } from '@supabase/supabase-js';
 
 // --- SUPABASE & AI CONFIGURATION ---
-// This block safely checks for both Vercel (NEXT_PUBLIC) and Vite (VITE) prefixes
 const SUPABASE_URL = 
   process.env.NEXT_PUBLIC_SUPABASE_URL || 
   (import.meta as any).env?.VITE_SUPABASE_URL || 
@@ -24,18 +23,11 @@ const SUPABASE_ANON_KEY =
   (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 
   ''; 
 
-
-
-
 // --- VITE-ONLY KEY RETRIEVAL ---
 const GOOGLE_API_KEY = (import.meta as any).env?.VITE_GOOGLE_API_KEY || '';
 
 // Diagnostic log to see in your Vercel browser console
 console.log("[DEBUG] API Key detected:", !!GOOGLE_API_KEY, "Length:", GOOGLE_API_KEY?.length);
-
-
-
-
 
 // --- SUPABASE INSTANTIATION ---
 let supabase: any = null;
@@ -54,7 +46,6 @@ if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.length > 0) {
 const INITIAL_SETTINGS: AgentSettings = {
   businessName: 'EstateGuard AI',
   primaryColor: '#d4af37',
-  // Use the pre-defined GOOGLE_API_KEY variable from the top of your file
   apiKey: GOOGLE_API_KEY, 
   highSecurityMode: true,
   subscriptionTier: 'Enterprise',
@@ -119,11 +110,11 @@ const App: React.FC = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [notifications, setNotifications] = useState(0);
 
-  // Helper to map DB columns to your Lead Type
+  // FIXED: Mapping helper to match 'name' and 'phone' columns in Supabase schema
   const mapLead = (d: any): Lead => ({
     id: d.id,
-    name: d.lead_name || "New Prospect",
-    phone: d.lead_phone || "N/A",
+    name: d.name || "New Prospect",
+    phone: d.phone || "N/A",
     financing_status: 'Unverified',
     property_id: 'General',
     property_address: d.property_address || "N/A",
@@ -135,15 +126,14 @@ const App: React.FC = () => {
   // --- SYNC & REALTIME SUBSCRIPTION ---
   useEffect(() => {
     const initSync = async () => {
-      // 1. Initial Load of existing leads from Supabase
+      if (!supabase) return;
+      // Note: Assumes created_at column has been added to Supabase
       const { data } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
       
       if (data) setLeads(data.map(mapLead));
 
-      // 2. Realtime Listener: This makes the "Priority Leads" pill pop up instantly
       const channel = supabase.channel('schema-db-changes')
         .on('postgres_changes',{ event: 'INSERT', schema: 'public', table: 'leads' },(payload: any) => {
-            // When a new row hits Supabase, update the local state immediately
             setLeads((prev) => [mapLead(payload.new), ...prev]);
             setNotifications((prev) => prev + 1);
           }).subscribe();
@@ -156,20 +146,21 @@ const App: React.FC = () => {
   const selectedProperty = properties.find(p => p.property_id === selectedPropertyId) || null;
 
   const handleStatusChange = async (id: string, newStatus: LeadStatus) => {
+    if (!supabase) return;
     await supabase.from('leads').update({ status: newStatus }).eq('id', id);
     setLeads(prev => prev.map(l => l.id === id ? {...l, status: newStatus} : l));
   };
 
   const handleCaptureLead = async (leadPart: Partial<Lead>) => {
-    // We insert to Supabase; the Realtime Listener above updates the UI 
     if (!supabase) {
       console.error("Cannot capture lead: Supabase is not initialized.");
       return;
     }
 
+    // FIXED: Insert matching 'name' and 'phone' columns in Supabase schema
     const { error } = await supabase.from('leads').insert([{
-      lead_name: leadPart.name || "New Prospect",
-      lead_phone: leadPart.phone || "N/A",
+      name: leadPart.name || "New Prospect",
+      phone: leadPart.phone || "N/A",
       property_address: leadPart.property_address || "N/A",
       chat_summary: leadPart.notes?.[0] || "Captured via AI Concierge",
       status: 'New'
