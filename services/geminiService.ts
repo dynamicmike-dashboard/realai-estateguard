@@ -2,15 +2,15 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { SCRAPER_SYSTEM_INSTRUCTION, ESTATE_GUARD_SYSTEM_INSTRUCTION } from "../constants";
 import { PropertySchema, AgentSettings } from "../types";
 
-// --- DUAL-PREFIX KEY RETRIEVAL ---
-// This is the "magic" that allows the browser to find your Vercel keys
+// --- API KEY RETRIEVAL ---
+// Unified helper to handle Vite environment variables and passed keys
 const getApiKey = (passedKey?: string) => {
   return passedKey || 
     (import.meta as any).env?.VITE_GOOGLE_API_KEY || 
-    process.env.NEXT_PUBLIC_GOOGLE_API_KEY || 
     '';
 };
 
+// --- SYSTEM INSTRUCTION HYDRATION ---
 const hydrateInstruction = (settings: AgentSettings) => {
   return ESTATE_GUARD_SYSTEM_INSTRUCTION
     .replace(/{BUSINESS_NAME}/g, settings.businessName || "our agency")
@@ -18,11 +18,8 @@ const hydrateInstruction = (settings: AgentSettings) => {
     .replace(/{SPECIALTIES}/g, settings.specialties?.join(", ") || "Luxury Real Estate");
 };
 
-
-
-
-
-// ADD THIS HELPER at the top of your geminiService.ts file
+// --- RESILIENT JSON EXTRACTION ---
+// Strips markdown fences (```json) and extracts valid JSON objects
 function extractJson(text: string): any {
   const fencedMatch = text.match(/```json([\s\S]*?)```/i) || text.match(/```([\s\S]*?)```/);
   const jsonCandidate = (fencedMatch ? fencedMatch[1] : text).trim();
@@ -36,36 +33,33 @@ function extractJson(text: string): any {
   return JSON.parse(sliced);
 }
 
-
-
-
-
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// Standardize key retrieval
-const getApiKey = () => (import.meta as any).env?.VITE_GOOGLE_API_KEY || '';
-
+// --- PROPERTY DATA SCRAPER ---
 export const parsePropertyData = async (input: string, apiKey?: string): Promise<any> => {
-  const activeKey = apiKey || getApiKey();
+  const activeKey = getApiKey(apiKey);
   const genAI = new GoogleGenerativeAI(activeKey);
   
-  // FIX: Explicitly use 'gemini-1.5-flash' with the 'v1' API version
+  // FIX: Force 'v1' API version to resolve the 404 "model not found" error
   const model = genAI.getGenerativeModel(
     { model: 'gemini-1.5-flash' }, 
     { apiVersion: 'v1' }
   );
 
-  const prompt = `Extract property data from: "${input}". Return JSON: address, price, bedrooms, bathrooms, sq_ft, hero_narrative.`;
+  const prompt = `
+    SYSTEM: ${SCRAPER_SYSTEM_INSTRUCTION}
+    USER REQUEST: Extract property data from: "${input}". 
+    REQUIREMENTS: Return ONLY a valid JSON object with: address, price, bedrooms, bathrooms, sq_ft, hero_narrative.
+  `;
 
   try {
     const result = await model.generateContent(prompt);
     const text = result.response.text();
     
-    // Resilient JSON parsing
-    const cleanedJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    const data = JSON.parse(cleanedJson);
+    // Use resilient extractor to handle markdown formatting
+    const data = extractJson(text);
     
-    if (!data.property_id) data.property_id = `EG-${Math.floor(Math.random() * 1000)}`;
+    if (!data.property_id) {
+      data.property_id = `EG-${Math.floor(Math.random() * 1000)}`;
+    }
     return data;
   } catch (e) {
     console.error("[DEBUG] Gemini Execution Error:", e);
@@ -73,7 +67,7 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
   }
 };
 
-
+// --- AI CONCIERGE CHAT ---
 export const chatWithGuard = async (
   history: any[],
   propertyContext: PropertySchema,
@@ -82,13 +76,21 @@ export const chatWithGuard = async (
 ) => {
   const activeKey = getApiKey(apiKey);
   const genAI = new GoogleGenerativeAI(activeKey);
-  const model = genAI.getGenerativeModel({ 
-    model: 'gemini-1.5-flash',
-    systemInstruction: `${hydrateInstruction(settings)}\n\nAUTHENTIC PROPERTY DATABASE:\n${JSON.stringify(propertyContext, null, 2)}`
-  });
+  
+  // Force v1 for stability in chat deployment
+  const model = genAI.getGenerativeModel(
+    { 
+      model: 'gemini-1.5-flash',
+      systemInstruction: `${hydrateInstruction(settings)}\n\nAUTHENTIC PROPERTY DATABASE:\n${JSON.stringify(propertyContext, null, 2)}`
+    },
+    { apiVersion: 'v1' }
+  );
 
   const chat = model.startChat({ 
-    history: history.map(h => ({ role: h.role === 'model' ? 'model' : 'user', parts: h.parts })) 
+    history: history.map(h => ({ 
+      role: h.role === 'model' ? 'model' : 'user', 
+      parts: h.parts 
+    })) 
   });
   
   const lastUserMsg = history[history.length - 1].parts[0].text;
@@ -97,10 +99,16 @@ export const chatWithGuard = async (
   return response.text();
 };
 
+// --- AUDIO TRANSCRIPTION ---
 export const transcribeAudio = async (base64Audio: string, apiKey?: string): Promise<string> => {
   const activeKey = getApiKey(apiKey);
   const genAI = new GoogleGenerativeAI(activeKey);
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  
+  // Force v1 for multimodal processing
+  const model = genAI.getGenerativeModel(
+    { model: 'gemini-1.5-flash' },
+    { apiVersion: 'v1' }
+  );
 
   const result = await model.generateContent([
     { inlineData: { mimeType: 'audio/mp3', data: base64Audio } },
