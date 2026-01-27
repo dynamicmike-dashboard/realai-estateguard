@@ -40,30 +40,30 @@ function extractJson(text: string): any {
 
 
 
-// THE UPDATED FUNCTION
-export const parsePropertyData = async (input: string, apiKey?: string): Promise<PropertySchema> => {
-  const activeKey = apiKey || (import.meta as any).env?.VITE_GOOGLE_API_KEY || '';
-  
-  if (!activeKey) {
-    throw new Error("Missing API Key");
-  }
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-  // FORCE API VERSION v1 TO FIX THE 404 ERROR
+// Standardize key retrieval
+const getApiKey = () => (import.meta as any).env?.VITE_GOOGLE_API_KEY || '';
+
+export const parsePropertyData = async (input: string, apiKey?: string): Promise<any> => {
+  const activeKey = apiKey || getApiKey();
   const genAI = new GoogleGenerativeAI(activeKey);
+  
+  // FIX: Explicitly use 'gemini-1.5-flash' with the 'v1' API version
   const model = genAI.getGenerativeModel(
     { model: 'gemini-1.5-flash' }, 
-    { apiVersion: 'v1' } // <-- THIS IS THE CRITICAL LINE
+    { apiVersion: 'v1' }
   );
 
-  const prompt = `
-    Extract property data as JSON from: "${input}". 
-    Required fields: address, price, bedrooms, bathrooms, sq_ft, hero_narrative.
-  `;
+  const prompt = `Extract property data from: "${input}". Return JSON: address, price, bedrooms, bathrooms, sq_ft, hero_narrative.`;
 
   try {
     const result = await model.generateContent(prompt);
     const text = result.response.text();
-    const data = extractJson(text); // Use our resilient helper
+    
+    // Resilient JSON parsing
+    const cleanedJson = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    const data = JSON.parse(cleanedJson);
     
     if (!data.property_id) data.property_id = `EG-${Math.floor(Math.random() * 1000)}`;
     return data;
