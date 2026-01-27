@@ -41,7 +41,7 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
   // FIX: Force 'v1' API version to resolve the 404 "model not found" error
   const model = genAI.getGenerativeModel(
     { model: 'gemini-1.5-flash' }, 
-    { apiVersion: 'v1' }
+    { apiVersion: 'v1beta' }
   );
 
   const prompt = `
