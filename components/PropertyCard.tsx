@@ -44,7 +44,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onSelect }) => {
       
       <div className="p-6">
         <div className="mb-4">
-            <span className="text-[9px] font-bold text-gold uppercase tracking-[0.2em]">{property.category}</span>
+            <div className="flex justify-between items-center">
+                <span className="text-[9px] font-bold text-gold uppercase tracking-[0.2em]">{property.category}</span>
+                <span className="text-xs font-bold text-slate-900 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                   {property?.listing_details?.price > 0 ? `$${property.listing_details.price.toLocaleString()}` : 'Price Pending'}
+                </span>
+            </div>
             <h4 className="font-luxury font-bold text-slate-900 text-lg line-clamp-1 mt-1">{property?.listing_details?.address || 'Address Pending'}</h4>
         </div>
         
