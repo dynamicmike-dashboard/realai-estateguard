@@ -7,6 +7,7 @@ export type PropertyCategory = 'Residential' | 'Commercial' | 'Land' | 'Rental';
 
 export interface PropertySchema {
   property_id: string;
+  user_id?: string; // Links property to specific agent
   category: PropertyCategory;
   status: 'Active' | 'Pending' | 'Sold' | 'Rented';
   tier: PropertyTier;

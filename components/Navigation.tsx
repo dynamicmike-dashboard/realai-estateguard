@@ -4,9 +4,10 @@ interface NavigationProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   brandColor?: string;
+  onSignOut: () => void;
 }
 
-const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, brandColor = '#d4af37' }) => {
+const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, brandColor = '#d4af37', onSignOut }) => {
   const menuItems = [
     { id: 'dashboard', icon: 'fa-chart-line', label: 'Command' },
     { id: 'properties', icon: 'fa-building', label: 'Portfolio' },
@@ -44,7 +45,15 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, brandC
           ))}
         </nav>
 
-        <div className="mt-auto pt-6 border-t border-slate-900">
+        <div className="mt-auto border-t border-slate-900 pt-6 space-y-4">
+          <button 
+            onClick={onSignOut}
+            className="w-full flex items-center gap-4 px-4 py-3 text-red-400 hover:bg-slate-900 rounded-xl transition-all"
+          >
+            <i className="fa-solid fa-right-from-bracket w-5 text-center"></i>
+            <span className="font-bold text-sm tracking-wide">Sign Out</span>
+          </button>
+
           <div className="flex items-center gap-3 px-2">
             <div className="w-10 h-10 rounded-full border border-slate-800 flex items-center justify-center bg-slate-900">
                 <i className="fa-solid fa-user-tie text-gold"></i>

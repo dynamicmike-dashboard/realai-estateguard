@@ -9,38 +9,13 @@ import Kanban from './components/Kanban';
 import Settings from './components/Settings';
 import PropertyDetails from './components/PropertyDetails';
 import { PropertySchema, Lead, PropertyTier, AgentSettings, LeadStatus } from './types';
-// Antigravity provisions this library automatically via this import
-import { createClient } from '@supabase/supabase-js';
 
-// --- SUPABASE & AI CONFIGURATION ---
-const SUPABASE_URL = 
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 
-  (import.meta as any).env?.VITE_SUPABASE_URL || 
-  'https://qrydrfgrwzjewkjennli.supabase.co';
-
-const SUPABASE_ANON_KEY = 
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 
-  (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 
-  ''; 
+// Auth & Database Imports
+import { supabase, useAuth } from './components/Auth/AuthProvider';
+import { Login } from './components/Auth/Login';
 
 // --- VITE-ONLY KEY RETRIEVAL ---
 const GOOGLE_API_KEY = (import.meta as any).env?.VITE_GOOGLE_API_KEY || '';
-
-// Diagnostic log to see in your Vercel browser console
-console.log("[DEBUG] API Key detected:", !!GOOGLE_API_KEY, "Length:", GOOGLE_API_KEY?.length);
-
-// --- SUPABASE INSTANTIATION ---
-let supabase: any = null;
-
-if (SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.length > 0) {
-  try {
-    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  } catch (e) {
-    console.error("Supabase init failed:", e);
-  }
-} else {
-  console.error("Supabase Key missing! Dashboard running in Offline Mode.");
-}
 
 // --- INITIAL APP SETTINGS ---
 const INITIAL_SETTINGS: AgentSettings = {
@@ -101,6 +76,8 @@ const MOCK_PROPERTIES: PropertySchema[] = [
 ];
 
 const App: React.FC = () => {
+  const { user, loading, signOut } = useAuth(); // Auth Hook
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [settings, setSettings] = useState<AgentSettings>(INITIAL_SETTINGS);
   const [properties, setProperties] = useState<PropertySchema[]>(MOCK_PROPERTIES);
@@ -123,25 +100,45 @@ const App: React.FC = () => {
     notes: [d.chat_summary || ""]
   });
 
+  // --- AUTH CHECK ---
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin w-12 h-12 border-4 border-gold border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Login />;
+  }
+
   // --- SYNC & REALTIME SUBSCRIPTION ---
   useEffect(() => {
     const initSync = async () => {
       if (!supabase) return;
-      // Note: Assumes created_at column has been added to Supabase
-      const { data } = await supabase.from('leads').select('*').order('created_at', { ascending: false });
+      // Fetch leads for THIS user only (RLS handles filtering)
+      const { data } = await supabase
+        .from('leads')
+        .select('*')
+        // .eq('user_id', user.id) // RLS does this, but explicit check doesn't hurt
+        .order('created_at', { ascending: false });
       
       if (data) setLeads(data.map(mapLead));
 
       const channel = supabase.channel('schema-db-changes')
         .on('postgres_changes',{ event: 'INSERT', schema: 'public', table: 'leads' },(payload: any) => {
-            setLeads((prev) => [mapLead(payload.new), ...prev]);
-            setNotifications((prev) => prev + 1);
+             // Only add if it belongs to me (RLS prevents getting others' events usually, but good to check)
+            if (payload.new.user_id === user.id) {
+               setLeads((prev) => [mapLead(payload.new), ...prev]);
+               setNotifications((prev) => prev + 1);
+            }
           }).subscribe();
 
       return () => { supabase.removeChannel(channel); };
     };
     initSync();
-  }, []);
+  }, [user.id]); // Re-run if user changes
 
   const selectedProperty = properties.find(p => p.property_id === selectedPropertyId) || null;
 
@@ -152,13 +149,11 @@ const App: React.FC = () => {
   };
 
   const handleCaptureLead = async (leadPart: Partial<Lead>) => {
-    if (!supabase) {
-      console.error("Cannot capture lead: Supabase is not initialized.");
-      return;
-    }
+    if (!supabase) return;
 
-    // FIXED: Insert matching 'name' and 'phone' columns in Supabase schema
+    // FIXED: Insert with user_id to enforce ownership
     const { error } = await supabase.from('leads').insert([{
+      user_id: user.id, // <--- Key for Multi-Tenancy
       name: leadPart.name || "New Prospect",
       phone: leadPart.phone || "N/A",
       property_address: leadPart.property_address || "N/A",
@@ -239,7 +234,12 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden flex-col md:flex-row">
-      <Navigation activeTab={activeTab} setActiveTab={setActiveTab} brandColor={settings.primaryColor} />
+      <Navigation 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        brandColor={settings.primaryColor} 
+        onSignOut={signOut}
+      />
 
       <main className="flex-1 overflow-y-auto main-content no-scrollbar flex flex-col">
         {/* PWA Install Notification */}
