@@ -18,6 +18,7 @@ export interface PropertySchema {
   listing_details: {
     address: string;
     price: number;
+    image_url?: string; // Extracted featured image
     video_tour_url?: string;
     key_stats: {
       bedrooms?: number;

@@ -122,6 +122,7 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
     "listing_details": {
       "address": "Full address string",
       "price": number (no symbols),
+      "image_url": "string (URL of the main property image if found in text)",
       "hero_narrative": "A compelling marketing description (2 sentences)",
       "key_stats": {
         "bedrooms": number,

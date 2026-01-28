@@ -17,7 +17,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onSelect }) => {
     >
       <div className="relative h-56 overflow-hidden">
         <img 
-          src={`https://picsum.photos/seed/${property.property_id}/600/400`} 
+          src={property?.listing_details?.image_url || `https://picsum.photos/seed/${property.property_id}/600/400`} 
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
           alt="Property" 
         />
