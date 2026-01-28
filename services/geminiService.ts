@@ -139,7 +139,7 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
   const prompt = `Extract property data from the following text into a structured JSON object. 
   
   Input Context: ${processingNote}
-  Input Text: "${processedInput.slice(0, 30000)}..." 
+  Input Text: "${processedInput.slice(0, 200000)}..." 
 
   IMPORTANT RULES:
   1. I am an AI. If the input gives me full scraped website text, I CAN read it and extract valid details (Price, Beds, Narrative, etc.).
