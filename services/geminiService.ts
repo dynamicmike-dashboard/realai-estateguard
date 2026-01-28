@@ -39,10 +39,10 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
   const activeKey = apiKey || (import.meta as any).env?.VITE_GOOGLE_API_KEY || '';
   const genAI = new GoogleGenerativeAI(activeKey);
   
-  // FIXED: Use standard stable model
+  // SAFETY FALLBACK: Use gemini-pro on v1 for maximum stability
   const model = genAI.getGenerativeModel(
-    { model: 'gemini-1.5-flash' }, 
-    { apiVersion: 'v1beta' } 
+    { model: 'gemini-pro' }, 
+    { apiVersion: 'v1' } 
   );
 
   const prompt = `Extract property data from the following text into a structured JSON object. 
@@ -106,10 +106,10 @@ export const chatWithGuard = async (
   // Force v1beta for stability in chat deployment
   const model = genAI.getGenerativeModel(
     { 
-      model: 'gemini-1.5-flash',
+      model: 'gemini-pro',
       systemInstruction: `${hydrateInstruction(settings)}\n\nAUTHENTIC PROPERTY DATABASE:\n${JSON.stringify(propertyContext, null, 2)}`
     },
-    { apiVersion: 'v1beta' }
+    { apiVersion: 'v1' }
   );
 
   const chat = model.startChat({ 
@@ -132,8 +132,8 @@ export const transcribeAudio = async (base64Audio: string, apiKey?: string): Pro
   
   // Force v1 for multimodal processing
   const model = genAI.getGenerativeModel(
-    { model: 'gemini-1.5-flash' },
-    { apiVersion: 'v1beta' }
+    { model: 'gemini-pro' },
+    { apiVersion: 'v1' }
   );
 
   const result = await model.generateContent([
