@@ -147,6 +147,9 @@ const App: React.FC = () => {
 
         if (error) {
           console.error("Error fetching properties:", error);
+          if (error.code === '42703') {
+             alert("SYSTEM ALERT: Database Schema Mismatch.\n\nThe 'properties' table is missing required columns (address, created_at).\n\nPlease run the SQL migration script in your Supabase Dashboard to fix this.");
+          }
         } else if (data && data.length > 0) {
             // Merge fetched properties with mock data (or replace if you prefer pure DB)
             // For this app, we'll PREPEND DB properties to the mock ones so user sees their uploads + examples
