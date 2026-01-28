@@ -421,7 +421,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <footer className="mt-auto px-10 py-16 bg-slate-950 text-slate-600 text-[11px] font-bold border-t border-white/5 uppercase tracking-[0.2em]">
+        <footer className="mt-auto px-10 py-16 bg-slate-950 text-slate-300 text-[11px] font-bold border-t border-white/5 uppercase tracking-[0.2em]">
           <div className="flex flex-col md:flex-row justify-between items-center gap-10">
             <div className="flex flex-wrap justify-center gap-12">
               <button onClick={() => showFooterModal('manual')} className="hover:text-gold transition-colors">Operating Manual</button>
