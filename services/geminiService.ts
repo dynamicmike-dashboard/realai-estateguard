@@ -35,13 +35,51 @@ function extractJson(text: string): any {
 
 // --- PROPERTY DATA SCRAPER ---
 
-export const parsePropertyData = async (input: string, apiKey?: string): Promise<any> => {
-  const activeKey = apiKey || (import.meta as any).env?.VITE_GOOGLE_API_KEY || '';
-  const genAI = new GoogleGenerativeAI(activeKey);
-  
-  // FIXED: Rely on SDK default versioning for best compatibility
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+// --- FALLBACK LOGIC ---
+const KNOWN_MODELS = [
+  { name: 'gemini-1.5-flash', apiVersion: undefined },       // Try default SDK routing first
+  { name: 'gemini-1.5-flash-latest', apiVersion: 'v1beta' }, // Explicit beta latest
+  { name: 'gemini-1.5-flash-001', apiVersion: 'v1beta' },    // Explicit beta 001
+  { name: 'gemini-pro', apiVersion: 'v1' },                  // Stable v1 fallback
+  { name: 'gemini-1.0-pro', apiVersion: 'v1' },              // Legacy stable
+];
 
+async function executeWithFallback<T>(
+  action: (model: any) => Promise<T>, 
+  getApiKey: () => string,
+  systemInstruction?: string
+): Promise<T> {
+  const activeKey = getApiKey();
+  const genAI = new GoogleGenerativeAI(activeKey);
+  let lastError: any;
+
+  for (const config of KNOWN_MODELS) {
+    try {
+      // console.log(`[DEBUG] Trying model: ${config.name} (${config.apiVersion || 'default'})`);
+      const modelParams: any = { model: config.name };
+      if (systemInstruction) modelParams.systemInstruction = systemInstruction;
+      
+      const requestOptions: any = {};
+      if (config.apiVersion) requestOptions.apiVersion = config.apiVersion;
+
+      const model = genAI.getGenerativeModel(modelParams, requestOptions);
+      return await action(model);
+    } catch (e: any) {
+      // If 404 (Not Found) or 400 (Bad Request - invalid model), try next
+      if (e.message?.includes('404') || e.message?.includes('400') || e.message?.includes('not found')) {
+        console.warn(`[Gemini] Model ${config.name} failed: ${e.message}. Retrying...`);
+        lastError = e;
+        continue;
+      }
+      throw e; // Use the first critical error if it's not a model availability issue
+    }
+  }
+  throw new Error(`All Gemini models failed. Last error: ${lastError?.message || 'Unknown'}`);
+}
+
+// --- PROPERTY DATA SCRAPER ---
+
+export const parsePropertyData = async (input: string, apiKey?: string): Promise<any> => {
   const prompt = `Extract property data from the following text into a structured JSON object. 
   
   Input Text: "${input}"
@@ -75,19 +113,13 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
   
   If a field is not found, infer a reasonable value or use null. Return ONLY the JSON.`;
 
-  try {
+  return executeWithFallback(async (model) => {
     const result = await model.generateContent(prompt);
     const text = result.response.text();
-    const data = extractJson(text); // Use the helper we added earlier
-    
-    // Fallback ID if model forgets
+    const data = extractJson(text);
     if (!data.property_id) data.property_id = `EG-${Math.floor(Math.random() * 1000)}`;
-    
     return data;
-  } catch (e) {
-    console.error("[DEBUG] Gemini Execution Error:", e);
-    throw new Error("Intelligence sync failed. Please verify the source data and try again.");
-  }
+  }, () => apiKey || (import.meta as any).env?.VITE_GOOGLE_API_KEY || '');
 };
 
 // --- AI CONCIERGE CHAT ---
@@ -97,41 +129,30 @@ export const chatWithGuard = async (
   settings: AgentSettings,
   apiKey?: string
 ) => {
-  const activeKey = getApiKey(apiKey);
-  const genAI = new GoogleGenerativeAI(activeKey);
-  
-  // Force v1beta for stability in chat deployment
-  const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
-      systemInstruction: `${hydrateInstruction(settings)}\n\nAUTHENTIC PROPERTY DATABASE:\n${JSON.stringify(propertyContext, null, 2)}`
-  });
-
-  const chat = model.startChat({ 
-    history: history.map(h => ({ 
-      role: h.role === 'model' ? 'model' : 'user', 
-      parts: h.parts 
-    })) 
-  });
-  
+  const systemInstruction = `${hydrateInstruction(settings)}\n\nAUTHENTIC PROPERTY DATABASE:\n${JSON.stringify(propertyContext, null, 2)}`;
   const lastUserMsg = history[history.length - 1].parts[0].text;
-  const result = await chat.sendMessage(lastUserMsg);
-  const response = await result.response;
-  return response.text();
+
+  return executeWithFallback(async (model) => {
+    const chat = model.startChat({ 
+      history: history.slice(0, -1).map(h => ({ 
+        role: h.role === 'model' ? 'model' : 'user', 
+        parts: h.parts 
+      })) 
+    });
+    const result = await chat.sendMessage(lastUserMsg);
+    const response = await result.response;
+    return response.text();
+  }, () => getApiKey(apiKey), systemInstruction);
 };
 
 // --- AUDIO TRANSCRIPTION ---
 export const transcribeAudio = async (base64Audio: string, apiKey?: string): Promise<string> => {
-  const activeKey = getApiKey(apiKey);
-  const genAI = new GoogleGenerativeAI(activeKey);
-  
-  // Use 1.5-flash for audio
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-  const result = await model.generateContent([
-    { inlineData: { mimeType: 'audio/mp3', data: base64Audio } },
-    { text: "STRICT TRANSCRIPTION: Convert this voice note to text without additions." }
-  ]);
-
-  const response = await result.response;
-  return response.text() || "";
+  return executeWithFallback(async (model) => {
+    const result = await model.generateContent([
+      { inlineData: { mimeType: 'audio/mp3', data: base64Audio } },
+      { text: "STRICT TRANSCRIPTION: Convert this voice note to text without additions." }
+    ]);
+    const response = await result.response;
+    return response.text() || "";
+  }, () => getApiKey(apiKey));
 };
