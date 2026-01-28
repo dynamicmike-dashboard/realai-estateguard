@@ -168,22 +168,35 @@ const App: React.FC = () => {
     }, [user?.id]);
 
   const handleCaptureLead = async (leadPart: Partial<Lead>) => {
-    if (!supabase || !user) return; // Guard
+    console.log("Attempting capture:", leadPart); // Debug log
+    if (!supabase || !user) {
+        alert("System Error: Auth or Database connection missing.");
+        return; 
+    }
 
     // FIXED: Insert with user_id to enforce ownership
-    const { data, error } = await supabase.from('leads').insert([{
+    const payload = {
       user_id: user.id, // <--- Key for Multi-Tenancy
       name: leadPart.name || "New Prospect",
       phone: leadPart.phone || "N/A",
       property_address: leadPart.property_address || "N/A",
       chat_summary: leadPart.notes?.[0] || "Captured via AI Concierge",
       status: 'New'
-    }]).select(); // Select the returned row
+    };
+
+    const { data, error } = await supabase.from('leads').insert([payload]).select(); // Select the returned row
     
     if (error) {
       console.error("Supabase Save Error:", error.message);
       alert("Error saving lead: " + error.message);
     } else if (data) {
+      alert("Success! Lead captured for " + (leadPart.name || "User")); // User Confirmation
+      // Manually update state to ensure immediate UI feedback
+      // (The realtime subscription handles this too, but this is a safer fallback)
+      setLeads(prev => [mapLead(data[0]), ...prev]);
+      setNotifications(prev => prev + 1);
+    }
+  };
       // Manually update state to ensure immediate UI feedback
       // (The realtime subscription handles this too, but this is a safer fallback)
       setLeads(prev => [mapLead(data[0]), ...prev]);
