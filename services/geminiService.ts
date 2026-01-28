@@ -39,21 +39,53 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
   const activeKey = apiKey || (import.meta as any).env?.VITE_GOOGLE_API_KEY || '';
   const genAI = new GoogleGenerativeAI(activeKey);
   
-  // UPDATED MODEL ID: Verified from your ListModels output
+  // FIXED: Use standard stable model
   const model = genAI.getGenerativeModel(
-    { model: 'gemini-2.5-flash' }, 
+    { model: 'gemini-1.5-flash' }, 
     { apiVersion: 'v1' } 
   );
 
-  const prompt = `Extract property data as JSON from: "${input}". 
-  Required fields: address, price, bedrooms, bathrooms, sq_ft, hero_narrative.`;
+  const prompt = `Extract property data from the following text into a structured JSON object. 
+  
+  Input Text: "${input}"
+
+  You must return a JSON object strictly following this schema:
+  {
+    "property_id": "EG-${Math.floor(Math.random() * 1000)}",
+    "category": "Residential" | "Commercial",
+    "status": "Active",
+    "tier": "Standard" | "Estate Guard",
+    "listing_details": {
+      "address": "Full address string",
+      "price": number (no symbols),
+      "hero_narrative": "A compelling marketing description (2 sentences)",
+      "key_stats": {
+        "bedrooms": number,
+        "bathrooms": number,
+        "sq_ft": number,
+        "lot_size": "string (e.g. 0.5 acres)"
+      }
+    },
+    "visibility_protocol": {
+      "public_fields": ["address", "hero_narrative"],
+      "gated_fields": ["private_appraisal", "seller_concessions"]
+    },
+    "agent_notes": {
+      "motivation": "string",
+      "showing_instructions": "string"
+    }
+  }
+  
+  If a field is not found, infer a reasonable value or use null. Return ONLY the JSON.`;
 
   try {
     const result = await model.generateContent(prompt);
     const text = result.response.text();
     const data = extractJson(text); // Use the helper we added earlier
     
+    // Fallback ID if model forgets
     if (!data.property_id) data.property_id = `EG-${Math.floor(Math.random() * 1000)}`;
+    
     return data;
   } catch (e) {
     console.error("[DEBUG] Gemini Execution Error:", e);

@@ -58,7 +58,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) =>
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
         <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">Lead Acquisition Heatmap</h3>
         {/* FIXED: Explicit height and min-height to prevent width(-1) warnings */}
-        <div className="w-full h-[300px] min-h-[300px] min-w-[300px] flex items-center justify-center">
+        <div className="w-full h-[300px] min-h-[300px] block relative" style={{ minWidth: '100%', minHeight: '300px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data}>
               <defs>
@@ -81,9 +81,9 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) =>
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
         <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">Asset Interaction Intensity</h3>
         {/* FIXED: Explicit dimensions added here as well */}
-        <div className="w-full h-[300px] min-h-[300px] min-w-[300px] flex items-center justify-center">
+        <div className="w-full h-[300px] min-h-[300px] block relative" style={{ minWidth: '100%', minHeight: '300px' }}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={properties.slice(0, 5).map(p => ({ name: p.property_id || p.id, hits: Math.floor(Math.random() * 80) + 20 }))}>
+            <BarChart data={properties.slice(0, 5).map(p => ({ name: p.property_id, hits: Math.floor(Math.random() * 80) + 20 }))}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} />
               <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} />
