@@ -100,35 +100,22 @@ const App: React.FC = () => {
     notes: [d.chat_summary || ""]
   });
 
-  // --- AUTH CHECK ---
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="animate-spin w-12 h-12 border-4 border-gold border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Login />;
-  }
-
   // --- SYNC & REALTIME SUBSCRIPTION ---
   useEffect(() => {
+    // Only run if we have a user
+    if (!user || !supabase) return;
+    
     const initSync = async () => {
-      if (!supabase) return;
       // Fetch leads for THIS user only (RLS handles filtering)
       const { data } = await supabase
         .from('leads')
         .select('*')
-        // .eq('user_id', user.id) // RLS does this, but explicit check doesn't hurt
         .order('created_at', { ascending: false });
       
       if (data) setLeads(data.map(mapLead));
 
       const channel = supabase.channel('schema-db-changes')
         .on('postgres_changes',{ event: 'INSERT', schema: 'public', table: 'leads' },(payload: any) => {
-             // Only add if it belongs to me (RLS prevents getting others' events usually, but good to check)
             if (payload.new.user_id === user.id) {
                setLeads((prev) => [mapLead(payload.new), ...prev]);
                setNotifications((prev) => prev + 1);
@@ -138,7 +125,7 @@ const App: React.FC = () => {
       return () => { supabase.removeChannel(channel); };
     };
     initSync();
-  }, [user.id]); // Re-run if user changes
+  }, [user?.id]); // Safe optional chaining
 
   const selectedProperty = properties.find(p => p.property_id === selectedPropertyId) || null;
 
@@ -149,7 +136,7 @@ const App: React.FC = () => {
   };
 
   const handleCaptureLead = async (leadPart: Partial<Lead>) => {
-    if (!supabase) return;
+    if (!supabase || !user) return; // Guard
 
     // FIXED: Insert with user_id to enforce ownership
     const { error } = await supabase.from('leads').insert([{
@@ -169,68 +156,82 @@ const App: React.FC = () => {
   };
 
   const showFooterModal = (type: string) => {
+    // ... (rest of function unchanged, just need to make sure I don't delete it)
     switch(type) {
       case 'manual':
         setModalContent({
-          title: 'Agent Operating Manual',
-          content: (
-            <div className="space-y-6 text-sm">
-              <section>
-                <h4 className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-xs">1. Property Ingestion</h4>
-                <p>Use the <b>Ingest</b> tab to onboard new assets. Structure residential, commercial, or land listings instantly via Gemini AI.</p>
-              </section>
-              <section>
-                <h4 className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-xs">2. Concierge Deployment</h4>
-                <p>Navigate to the <b>Concierge</b> tab to find your unique website embed code. This places the AI chatbot on your agency site.</p>
-              </section>
-              <section>
-                <h4 className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-xs">3. The Two-Strike Rule</h4>
-                <p>The bot is programmed to answer two specific questions about any property. Upon the third, it will pivot to secure lead capture.</p>
-              </section>
-            </div>
-          )
-        });
-        break;
+            title: 'Agent Operating Manual',
+            content: (
+              <div className="space-y-6 text-sm">
+                <section>
+                  <h4 className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-xs">1. Property Ingestion</h4>
+                  <p>Use the <b>Ingest</b> tab to onboard new assets. Structure residential, commercial, or land listings instantly via Gemini AI.</p>
+                </section>
+                <section>
+                  <h4 className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-xs">2. Concierge Deployment</h4>
+                  <p>Navigate to the <b>Concierge</b> tab to find your unique website embed code. This places the AI chatbot on your agency site.</p>
+                </section>
+                <section>
+                  <h4 className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-xs">3. The Two-Strike Rule</h4>
+                  <p>The bot is programmed to answer two specific questions about any property. Upon the third, it will pivot to secure lead capture.</p>
+                </section>
+              </div>
+            )
+          });
+          break;
       case 'privacy':
         setModalContent({
-          title: 'Privacy & Sovereignty',
-          content: (
-            <div className="space-y-4 text-sm">
-              <p>EstateGuard utilizes <b>Zero-Trust</b> architecture. Your property data and lead transcripts are your agency's private assets.</p>
-              <ul className="list-disc pl-5 space-y-2">
-                <li><b>Encryption:</b> AES-256 standard at rest.</li>
-                <li><b>Model Sovereignty:</b> Your data is NOT used to train global models.</li>
-              </ul>
-            </div>
-          )
-        });
-        break;
+            title: 'Privacy & Sovereignty',
+            content: (
+              <div className="space-y-4 text-sm">
+                <p>EstateGuard utilizes <b>Zero-Trust</b> architecture. Your property data and lead transcripts are your agency's private assets.</p>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li><b>Encryption:</b> AES-256 standard at rest.</li>
+                  <li><b>Model Sovereignty:</b> Your data is NOT used to train global models.</li>
+                </ul>
+              </div>
+            )
+          });
+          break;
       case 'terms':
         setModalContent({
-          title: 'Terms of Engagement',
-          content: (
-            <div className="space-y-4 text-sm">
-              <p>Usage of the EstateGuard AI platform requires compliance with local property disclosure regulations and maintenance of a valid personal Gemini API Key.</p>
-            </div>
-          )
-        });
-        break;
+            title: 'Terms of Engagement',
+            content: (
+              <div className="space-y-4 text-sm">
+                <p>Usage of the EstateGuard AI platform requires compliance with local property disclosure regulations and maintenance of a valid personal Gemini API Key.</p>
+              </div>
+            )
+          });
+          break;
       case 'legal':
         setModalContent({
-          title: 'Legal Disclaimer',
-          content: (
-            <div className="space-y-4 text-sm border-l-4 border-gold pl-4 italic">
-              <p>RealAi EstateGuard is an AI-driven facilitation tool. All outputs must be verified by a licensed professional.</p>
-              <p>© 2026 EstateGuard AI.</p>
-            </div>
-          )
-        });
-        break;
+            title: 'Legal Disclaimer',
+            content: (
+              <div className="space-y-4 text-sm border-l-4 border-gold pl-4 italic">
+                <p>RealAi EstateGuard is an AI-driven facilitation tool. All outputs must be verified by a licensed professional.</p>
+                <p>© 2026 EstateGuard AI.</p>
+              </div>
+            )
+          });
+          break;
     }
   };
 
   const agencySlug = settings.businessName.toLowerCase().replace(/\s+/g, '-');
   const embedCode = `<script \n  src="https://app.estateguard.ai/widget.js" \n  data-agent-id="${agencySlug}" \n  data-theme="gold" \n  async>\n</script>`;
+
+  // --- AUTH CHECKMOVED TO RENDER ---
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin w-12 h-12 border-4 border-gold border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Login />;
+  }
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden flex-col md:flex-row">
