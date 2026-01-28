@@ -35,7 +35,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, brandC
               className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${
                 activeTab === item.id 
                   ? 'text-white shadow-lg' 
-                  : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                  : 'text-slate-50 hover:bg-slate-900 hover:text-white'
               }`}
               style={activeTab === item.id ? { backgroundColor: brandColor, color: '#000' } : {}}
             >
@@ -72,7 +72,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, brandC
             key={item.id}
             onClick={() => setActiveTab(item.id)}
             className={`flex flex-col items-center gap-1 transition-all duration-200 ${
-              activeTab === item.id ? 'text-gold' : 'text-slate-400'
+              activeTab === item.id ? 'text-gold' : 'text-slate-50'
             }`}
           >
             <i className={`fa-solid ${item.icon} text-lg`}></i>

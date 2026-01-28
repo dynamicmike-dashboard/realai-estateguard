@@ -83,7 +83,7 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
       property_id: property.property_id,
       property_address: property.listing_details.address,
       notes: [`Prefers ${leadFormData.comm} at ${leadFormData.time}`]
-    });
+      notes: [`Prefers ${leadFormData.comm} at ${leadFormData.time}`]
     });
     setIsGated(false);
     setSpecificQuestionCount(0); // Reset strikes after successful lead capture

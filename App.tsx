@@ -139,16 +139,24 @@ const App: React.FC = () => {
     if (!supabase || !user) return; // Guard
 
     // FIXED: Insert with user_id to enforce ownership
-    const { error } = await supabase.from('leads').insert([{
+    const { data, error } = await supabase.from('leads').insert([{
       user_id: user.id, // <--- Key for Multi-Tenancy
       name: leadPart.name || "New Prospect",
       phone: leadPart.phone || "N/A",
       property_address: leadPart.property_address || "N/A",
       chat_summary: leadPart.notes?.[0] || "Captured via AI Concierge",
       status: 'New'
-    }]);
+    }]).select(); // Select the returned row
     
-    if (error) console.error("Supabase Save Error:", error.message);
+    if (error) {
+      console.error("Supabase Save Error:", error.message);
+      alert("Error saving lead: " + error.message);
+    } else if (data) {
+      // Manually update state to ensure immediate UI feedback
+      // (The realtime subscription handles this too, but this is a safer fallback)
+      setLeads(prev => [mapLead(data[0]), ...prev]);
+      setNotifications(prev => prev + 1);
+    }
   };
 
   const updateProperty = (updated: PropertySchema) => {
@@ -421,7 +429,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <footer className="mt-auto px-10 py-16 bg-slate-950 text-slate-300 text-[11px] font-bold border-t border-white/5 uppercase tracking-[0.2em]">
+        <footer className="mt-auto px-10 py-16 bg-slate-950 text-white text-[11px] font-bold border-t border-white/5 uppercase tracking-[0.2em]">
           <div className="flex flex-col md:flex-row justify-between items-center gap-10">
             <div className="flex flex-wrap justify-center gap-12">
               <button onClick={() => showFooterModal('manual')} className="hover:text-gold transition-colors">Operating Manual</button>
