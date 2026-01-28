@@ -45,26 +45,26 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onSelect }) => {
       <div className="p-6">
         <div className="mb-4">
             <span className="text-[9px] font-bold text-gold uppercase tracking-[0.2em]">{property.category}</span>
-            <h4 className="font-luxury font-bold text-slate-900 text-lg line-clamp-1 mt-1">{property.listing_details.address}</h4>
+            <h4 className="font-luxury font-bold text-slate-900 text-lg line-clamp-1 mt-1">{property?.listing_details?.address || 'Address Pending'}</h4>
         </div>
         
         <div className="flex items-center gap-4 text-slate-500 text-xs font-bold mb-4">
-          <span className="flex items-center gap-1.5"><i className="fa-solid fa-bed text-gold"></i> {property.listing_details.key_stats.bedrooms || '-'}</span>
-          <span className="flex items-center gap-1.5"><i className="fa-solid fa-bath text-gold"></i> {property.listing_details.key_stats.bathrooms || '-'}</span>
-          <span className="flex items-center gap-1.5"><i className="fa-solid fa-maximize text-gold"></i> {property.listing_details.key_stats.sq_ft.toLocaleString()}</span>
+          <span className="flex items-center gap-1.5"><i className="fa-solid fa-bed text-gold"></i> {property?.listing_details?.key_stats?.bedrooms || '-'}</span>
+          <span className="flex items-center gap-1.5"><i className="fa-solid fa-bath text-gold"></i> {property?.listing_details?.key_stats?.bathrooms || '-'}</span>
+          <span className="flex items-center gap-1.5"><i className="fa-solid fa-maximize text-gold"></i> {property?.listing_details?.key_stats?.sq_ft?.toLocaleString() || '-'}</span>
         </div>
         
         <p className="text-slate-600 text-xs line-clamp-2 italic mb-6 leading-relaxed">
-          "{property.listing_details.hero_narrative}"
+          "{property?.listing_details?.hero_narrative || 'Processing narrative...'}"
         </p>
         
         <div className="flex flex-wrap gap-1.5 mt-auto">
-          {property.visibility_protocol.gated_fields.slice(0, 3).map((field, idx) => (
+          {property?.visibility_protocol?.gated_fields?.slice(0, 3).map((field, idx) => (
             <span key={idx} className="bg-slate-50 text-slate-400 border border-slate-100 px-2 py-1 rounded text-[8px] font-bold uppercase tracking-tighter">
               <i className="fa-solid fa-lock mr-1 scale-75 opacity-50"></i> {field.replace(/_/g, ' ')}
             </span>
           ))}
-          {property.visibility_protocol.gated_fields.length > 3 && (
+          {property?.visibility_protocol?.gated_fields?.length > 3 && (
               <span className="text-[8px] text-slate-300 font-bold ml-1">+{property.visibility_protocol.gated_fields.length - 3} MORE</span>
           )}
         </div>
