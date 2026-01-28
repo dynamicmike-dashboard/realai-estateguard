@@ -143,12 +143,18 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
 
   IMPORTANT RULES:
   1. I am an AI. If the input gives me full scraped website text, I CAN read it and extract valid details (Price, Beds, Narrative, etc.).
-  2. If the input was JUST a URL and scraping failed:
+  2. LOOK HARDER FOR SPECS:
+     - Search for "Bed", "Bd", "Bedroom", "Bath", "Ba", "Sq Ft", "Square Feet".
+     - Search for price symbols like "$" followed by numbers.
+     - If you see "3 Bed" or "3bd", set 'bedrooms' to 3.
+     - If you see "2.5 Bath" or "2ba", set 'bathrooms' to 2.5.
+     - If you find the price in the text (e.g. "$1,250,000"), USE IT.
+  3. If the input was JUST a URL and scraping failed:
      - Try to extract the address from the URL slug.
      - Set 'hero_narrative' to: "Linked Property (Data Pending). Please paste the full description text."
      - Set 'price', 'bedrooms', 'bathrooms', 'sq_ft' to 0 or null.
-  3. DO NOT HALLUCINATE. If a field is not found in the text, use null.
-  4. IMAGES: If the input text contains HTML <img> tags or image URLs, try to find the "Main" or "Hero" image URL and put it in 'image_url'. Look for 'og:image' meta tags or large images.
+  4. DO NOT HALLUCINATE. Only use data present in the text.
+  5. IMAGES: If the input text contains HTML <img> tags or image URLs, try to find the "Main" or "Hero" image URL and put it in 'image_url'. Look for 'og:image' meta tags or large images.
 
   You must return a JSON object strictly following this schema:
   {
