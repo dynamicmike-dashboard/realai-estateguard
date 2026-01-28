@@ -37,11 +37,10 @@ function extractJson(text: string): any {
 
 // --- FALLBACK LOGIC ---
 const KNOWN_MODELS = [
-  { name: 'gemini-1.5-flash', apiVersion: undefined },       // Try default SDK routing first
-  { name: 'gemini-1.5-flash-latest', apiVersion: 'v1beta' }, // Explicit beta latest
-  { name: 'gemini-1.5-flash-001', apiVersion: 'v1beta' },    // Explicit beta 001
-  { name: 'gemini-pro', apiVersion: 'v1' },                  // Stable v1 fallback
-  { name: 'gemini-1.0-pro', apiVersion: 'v1' },              // Legacy stable
+  { name: 'gemini-2.0-flash', apiVersion: 'v1beta' },        // Confirmed available
+  { name: 'gemini-flash-latest', apiVersion: 'v1beta' },     // Confirmed available
+  { name: 'gemini-pro-latest', apiVersion: 'v1beta' },       // Confirmed available
+  { name: 'gemini-2.0-flash-lite', apiVersion: 'v1beta' },   // Confirmed available
 ];
 
 // --- DIAGNOSTICS ---
