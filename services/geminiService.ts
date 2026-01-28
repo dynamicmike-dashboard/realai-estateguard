@@ -108,18 +108,46 @@ async function executeWithFallback<T>(
 
 // --- PROPERTY DATA SCRAPER ---
 
-export const parsePropertyData = async (input: string, apiKey?: string): Promise<any> => {
+  // --- URL PROXY LOGIC ---
+  let processedInput = input;
+  let processingNote = "";
+
+  // Check if input looks like a URL
+  // Regex roughly matches http/https followed by non-whitespace
+  if (/^https?:\/\/[^\s]+$/.test(input.trim())) {
+      try {
+          console.log("[Ingestion] Input is URL. Routing through proxy...");
+          const proxyUrl = `/api/proxy?url=${encodeURIComponent(input.trim())}`;
+          const response = await fetch(proxyUrl);
+          
+          if (!response.ok) {
+             throw new Error(`Proxy status: ${response.status}`);
+          }
+          
+          const scrapedText = await response.text();
+          // Truncate if huge to avoid token limits (Gemini 2.0 has big context, but let's be safe)
+          processedInput = scrapedText.slice(0, 100000); 
+          processingNote = `(Analysis based on content scraped from URL: ${input})`;
+          console.log("[Ingestion] URL scraped successfully. Length:", processedInput.length);
+      } catch (e) {
+          console.warn("[Ingestion] Proxy failed, falling back to URL-only analysis:", e);
+          processingNote = "(Note: Live scrape failed. Data inferred from URL structure only.)";
+      }
+  }
+
   const prompt = `Extract property data from the following text into a structured JSON object. 
   
-  Input Text: "${input}"
+  Input Context: ${processingNote}
+  Input Text: "${processedInput.slice(0, 30000)}..." 
 
   IMPORTANT RULES:
-  1. I am an AI and cannot browse the live web. If the input is just a URL (e.g., https://...), do NOT invent data.
-  2. If the input is a URL:
+  1. I am an AI. If the input gives me full scraped website text, I CAN read it and extract valid details (Price, Beds, Narrative, etc.).
+  2. If the input was JUST a URL and scraping failed:
      - Try to extract the address from the URL slug.
      - Set 'hero_narrative' to: "Linked Property (Data Pending). Please paste the full description text."
-     - Set 'price', 'bedrooms', 'bathrooms', 'sq_ft' to 0 or null if not explicitly in the text.
+     - Set 'price', 'bedrooms', 'bathrooms', 'sq_ft' to 0 or null.
   3. DO NOT HALLUCINATE. If a field is not found in the text, use null.
+  4. IMAGES: If the input text contains HTML <img> tags or image URLs, try to find the "Main" or "Hero" image URL and put it in 'image_url'. Look for 'og:image' meta tags or large images.
 
   You must return a JSON object strictly following this schema:
   {
@@ -131,7 +159,7 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
       "address": "Full address string",
       "price": number (no symbols, use 0 if unknown),
       "image_url": "string (URL of the main property image if found in text)",
-      "hero_narrative": "Marketing description or 'Pending' message",
+      "hero_narrative": "Marketing description",
       "key_stats": {
         "bedrooms": number,
         "bathrooms": number,

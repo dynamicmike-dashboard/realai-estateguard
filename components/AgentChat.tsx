@@ -52,7 +52,7 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
       const history = messages.map(m => ({ role: m.role, parts: [{ text: m.text }] }));
       history.push({ role: 'user', parts: [{ text: promptPrefix + input }] });
       
-      const responseText = await chatWithGuard(history, property, settings);
+      const responseText = await chatWithGuard(history, property, settings, settings.apiKey);
       setMessages(prev => [...prev, { role: 'model', text: responseText || '' }]);
 
       if (shouldGateNow) {

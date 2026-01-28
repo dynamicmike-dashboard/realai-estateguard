@@ -401,7 +401,7 @@ const App: React.FC = () => {
             {activeTab === 'ingestion' && (
               <IngestionPortal 
                 onPropertyAdded={handlePropertyAdded} 
-                apiKey={GOOGLE_API_KEY} 
+                apiKey={settings.apiKey} 
               />
             )}
 
