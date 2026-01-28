@@ -197,12 +197,7 @@ const App: React.FC = () => {
       setNotifications(prev => prev + 1);
     }
   };
-      // Manually update state to ensure immediate UI feedback
-      // (The realtime subscription handles this too, but this is a safer fallback)
-      setLeads(prev => [mapLead(data[0]), ...prev]);
-      setNotifications(prev => prev + 1);
-    }
-  };
+
 
   const handlePropertyAdded = async (newProp: PropertySchema) => {
       // 1. Optimistic Update
