@@ -68,7 +68,7 @@ export const Login: React.FC = () => {
                         <input 
                             type="text" 
                             required 
-                            className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all font-medium"
+                            className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all font-medium"
                             placeholder="Prestige Worldwide Realty"
                             value={businessName}
                             onChange={e => setBusinessName(e.target.value)}
@@ -81,7 +81,7 @@ export const Login: React.FC = () => {
                     <input 
                         type="email" 
                         required 
-                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all font-medium"
+                        className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all font-medium"
                         placeholder="agent@example.com"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
@@ -93,7 +93,7 @@ export const Login: React.FC = () => {
                     <input 
                         type="password" 
                         required 
-                        className="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all font-medium"
+                        className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-gold/50 transition-all font-medium"
                         placeholder="••••••••"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
