@@ -40,10 +40,10 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
   const genAI = new GoogleGenerativeAI(activeKey);
   
   // SAFETY FALLBACK: Use gemini-pro on v1 for maximum stability
-  const model = genAI.getGenerativeModel({ 
-    model: 'gemini-pro',
-    apiVersion: 'v1'
-  });
+  const model = genAI.getGenerativeModel(
+    { model: 'gemini-pro' },
+    { apiVersion: 'v1' }
+  );
 
   const prompt = `Extract property data from the following text into a structured JSON object. 
   
@@ -130,10 +130,10 @@ export const transcribeAudio = async (base64Audio: string, apiKey?: string): Pro
   // Use gemini-pro for audio (text-only fallback as pro is not multimodal in v1 free tier usually, but trying for consistent API)
   // Note: gemini-pro is text-only. For audio we usually need 1.5-flash. 
   // However, since 1.5-flash is failing, we might break audio here, but we MUST fix text ingestion first.
-  const model = genAI.getGenerativeModel({ 
-    model: 'gemini-pro',
-    apiVersion: 'v1' 
-  });
+  const model = genAI.getGenerativeModel(
+    { model: 'gemini-pro' },
+    { apiVersion: 'v1' } 
+  );
 
   const result = await model.generateContent([
     { inlineData: { mimeType: 'audio/mp3', data: base64Audio } },
