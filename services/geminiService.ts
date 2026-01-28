@@ -42,7 +42,7 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
   // FIXED: Use standard stable model
   const model = genAI.getGenerativeModel(
     { model: 'gemini-1.5-flash' }, 
-    { apiVersion: 'v1' } 
+    { apiVersion: 'v1beta' } 
   );
 
   const prompt = `Extract property data from the following text into a structured JSON object. 
@@ -133,7 +133,7 @@ export const transcribeAudio = async (base64Audio: string, apiKey?: string): Pro
   // Force v1 for multimodal processing
   const model = genAI.getGenerativeModel(
     { model: 'gemini-1.5-flash' },
-    { apiVersion: 'v1' }
+    { apiVersion: 'v1beta' }
   );
 
   const result = await model.generateContent([
