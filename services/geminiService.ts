@@ -113,6 +113,14 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
   
   Input Text: "${input}"
 
+  IMPORTANT RULES:
+  1. I am an AI and cannot browse the live web. If the input is just a URL (e.g., https://...), do NOT invent data.
+  2. If the input is a URL:
+     - Try to extract the address from the URL slug.
+     - Set 'hero_narrative' to: "Linked Property (Data Pending). Please paste the full description text."
+     - Set 'price', 'bedrooms', 'bathrooms', 'sq_ft' to 0 or null if not explicitly in the text.
+  3. DO NOT HALLUCINATE. If a field is not found in the text, use null.
+
   You must return a JSON object strictly following this schema:
   {
     "property_id": "EG-${Math.floor(Math.random() * 1000)}",
@@ -121,9 +129,9 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
     "tier": "Standard" | "Estate Guard",
     "listing_details": {
       "address": "Full address string",
-      "price": number (no symbols),
+      "price": number (no symbols, use 0 if unknown),
       "image_url": "string (URL of the main property image if found in text)",
-      "hero_narrative": "A compelling marketing description (2 sentences)",
+      "hero_narrative": "Marketing description or 'Pending' message",
       "key_stats": {
         "bedrooms": number,
         "bathrooms": number,
@@ -141,7 +149,7 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
     }
   }
   
-  If a field is not found, infer a reasonable value or use null. Return ONLY the JSON.`;
+  Return ONLY the JSON.`;
 
   return executeWithFallback(async (model) => {
     const result = await model.generateContent(prompt);
