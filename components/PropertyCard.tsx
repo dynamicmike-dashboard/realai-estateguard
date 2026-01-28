@@ -8,7 +8,7 @@ interface PropertyCardProps {
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, onSelect }) => {
   const isEstateGuard = property.tier === PropertyTier.ESTATE_GUARD;
-  const hasVideo = !!property.listing_details.video_tour_url;
+  const hasVideo = !!property?.listing_details?.video_tour_url;
 
   return (
     <div 

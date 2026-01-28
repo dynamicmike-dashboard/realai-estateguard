@@ -139,7 +139,7 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ property, onDelete, o
                 {property.tier}
               </span>
             </div>
-            <h3 className="text-3xl font-luxury font-bold text-slate-900 leading-tight">{property.listing_details.address || 'Address Unspecified'}</h3>
+            <h3 className="text-3xl font-luxury font-bold text-slate-900 leading-tight">{property?.listing_details?.address || 'Address Unspecified'}</h3>
             <p className="text-slate-500 text-sm mt-2 flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
               Secure Asset Cloud • {property.property_id}
@@ -149,14 +149,14 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ property, onDelete, o
             <div className="bg-slate-50 p-5 rounded-[1.5rem] border border-slate-100 shadow-sm">
                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Valuation</p>
                <p className="text-xl font-bold text-slate-900">
-                 {property.listing_details.price > 0 
-                  ? `$${property.listing_details.price.toLocaleString()}` 
+                 {property?.listing_details?.price > 0 
+                  ? `$${property?.listing_details?.price?.toLocaleString()}` 
                   : 'Awaiting Quote'}
                </p>
             </div>
             <div className="bg-slate-50 p-5 rounded-[1.5rem] border border-slate-100 shadow-sm">
                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Scale</p>
-               <p className="text-xl font-bold text-slate-900">{property.listing_details.key_stats.sq_ft ? property.listing_details.key_stats.sq_ft.toLocaleString() : 'N/A'} SQ FT</p>
+               <p className="text-xl font-bold text-slate-900">{property?.listing_details?.key_stats?.sq_ft ? property?.listing_details?.key_stats?.sq_ft.toLocaleString() : 'N/A'} SQ FT</p>
             </div>
           </div>
         </div>
@@ -166,7 +166,7 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ property, onDelete, o
         <div>
           <h4 className="font-black text-slate-400 text-[10px] uppercase tracking-[0.2em] mb-4">Market Narrative</h4>
           <p className="text-slate-700 text-sm leading-relaxed italic border-l-4 border-gold pl-6 py-1">
-            "{property.listing_details.hero_narrative || 'Market briefing currently in production.'}"
+            "{property?.listing_details?.hero_narrative || 'Market briefing currently in production.'}"
           </p>
         </div>
 
@@ -176,8 +176,8 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ property, onDelete, o
                <i className="fa-solid fa-lock text-gold"></i> Gated Protocols
              </h4>
              <div className="flex flex-wrap gap-2">
-               {property.visibility_protocol.gated_fields.length > 0 ? (
-                 property.visibility_protocol.gated_fields.map((field, idx) => (
+               {property?.visibility_protocol?.gated_fields?.length > 0 ? (
+                 property?.visibility_protocol?.gated_fields?.map((field, idx) => (
                    <span key={idx} className="bg-slate-950 text-gold px-4 py-1.5 rounded-full text-[10px] font-bold shadow-md">
                      {field.replace(/_/g, ' ')}
                    </span>
@@ -192,8 +192,8 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ property, onDelete, o
                <i className="fa-solid fa-user-tie text-gold"></i> Agent Intelligence
              </h4>
              <div className="text-[11px] text-slate-600 space-y-2 bg-white p-6 rounded-2xl border border-slate-200/50 shadow-inner">
-               <p><span className="font-bold text-slate-900 uppercase">Motivation:</span> {property.agent_notes.motivation || 'Verify with HQ'}</p>
-               <p><span className="font-bold text-slate-900 uppercase">Access:</span> {property.agent_notes.showing_instructions || 'Appointment Required'}</p>
+               <p><span className="font-bold text-slate-900 uppercase">Motivation:</span> {property?.agent_notes?.motivation || 'Verify with HQ'}</p>
+               <p><span className="font-bold text-slate-900 uppercase">Access:</span> {property?.agent_notes?.showing_instructions || 'Appointment Required'}</p>
              </div>
            </div>
         </div>
