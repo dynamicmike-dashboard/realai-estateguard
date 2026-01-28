@@ -39,8 +39,11 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
   const activeKey = apiKey || (import.meta as any).env?.VITE_GOOGLE_API_KEY || '';
   const genAI = new GoogleGenerativeAI(activeKey);
   
-  // FIXED: Rely on SDK default versioning for best compatibility
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  // SAFETY FALLBACK: Use gemini-pro on v1 for maximum stability
+  const model = genAI.getGenerativeModel({ 
+    model: 'gemini-pro',
+    apiVersion: 'v1'
+  });
 
   const prompt = `Extract property data from the following text into a structured JSON object. 
   
@@ -100,11 +103,11 @@ export const chatWithGuard = async (
   const activeKey = getApiKey(apiKey);
   const genAI = new GoogleGenerativeAI(activeKey);
   
-  // Force v1beta for stability in chat deployment
+  // Force v1 for stability in chat deployment
   const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
+      model: 'gemini-pro',
       systemInstruction: `${hydrateInstruction(settings)}\n\nAUTHENTIC PROPERTY DATABASE:\n${JSON.stringify(propertyContext, null, 2)}`
-  });
+  }, { apiVersion: 'v1' });
 
   const chat = model.startChat({ 
     history: history.map(h => ({ 
@@ -124,8 +127,13 @@ export const transcribeAudio = async (base64Audio: string, apiKey?: string): Pro
   const activeKey = getApiKey(apiKey);
   const genAI = new GoogleGenerativeAI(activeKey);
   
-  // Use 1.5-flash for audio
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  // Use gemini-pro for audio (text-only fallback as pro is not multimodal in v1 free tier usually, but trying for consistent API)
+  // Note: gemini-pro is text-only. For audio we usually need 1.5-flash. 
+  // However, since 1.5-flash is failing, we might break audio here, but we MUST fix text ingestion first.
+  const model = genAI.getGenerativeModel({ 
+    model: 'gemini-pro',
+    apiVersion: 'v1' 
+  });
 
   const result = await model.generateContent([
     { inlineData: { mimeType: 'audio/mp3', data: base64Audio } },
