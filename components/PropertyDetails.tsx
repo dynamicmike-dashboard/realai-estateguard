@@ -124,7 +124,7 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ property, onDelete, o
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="aspect-video rounded-[2rem] overflow-hidden shadow-2xl border border-slate-100 bg-slate-200 relative group">
           <img 
-            src={`https://picsum.photos/seed/${property.property_id}/800/600`} 
+            src={property.listing_details.image_url || `https://picsum.photos/seed/${property.property_id}/800/600`} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
             alt="Property Hero" 
             onError={(e) => (e.currentTarget.src = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80')}
@@ -140,10 +140,6 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ property, onDelete, o
               </span>
             </div>
             <h3 className="text-3xl font-luxury font-bold text-slate-900 leading-tight">{property?.listing_details?.address || 'Address Unspecified'}</h3>
-            <p className="text-slate-500 text-sm mt-2 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-              Secure Asset Cloud • {property.property_id}
-            </p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-slate-50 p-5 rounded-[1.5rem] border border-slate-100 shadow-sm">
