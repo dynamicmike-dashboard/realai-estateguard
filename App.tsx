@@ -507,10 +507,20 @@ const App: React.FC = () => {
           <PropertyDetails 
             property={selectedProperty} 
             onUpdate={updateProperty}
-            onDelete={() => {
+            onDelete={async () => {
+              // 1. Optimistic Update
               setProperties(properties.filter(p => p.property_id !== selectedProperty.property_id));
               setIsDetailsOpen(false);
               setSelectedPropertyId(null);
+
+              // 2. Persist to DB
+              if (user && supabase) {
+                 const { error } = await supabase.from('properties').delete().eq('property_id', selectedProperty.property_id);
+                 if (error) {
+                    console.error("Delete failed:", error);
+                    alert("Failed to delete from database: " + error.message);
+                 }
+              }
             }}
             onTest={() => {
               setIsDetailsOpen(false);
