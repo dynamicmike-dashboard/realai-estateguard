@@ -70,7 +70,7 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
         });
       }
     } catch (e) {
-      setMessages(prev => [...prev, { role: 'model', text: "Guard connection unstable. Please try again or contact " + settings.businessName + " directly." }]);
+      setMessages(prev => [...prev, { role: 'model', text: "Sorry, the office is very busy today, please continue to enjoy browsing our portfolio." }]);
     } finally {
       setIsTyping(false);
     }
@@ -84,7 +84,9 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
       property_address: property.listing_details.address,
       notes: [`Prefers ${leadFormData.comm} at ${leadFormData.time}`]
     });
+    });
     setIsGated(false);
+    setSpecificQuestionCount(0); // Reset strikes after successful lead capture
     setMessages(prev => [...prev, { role: 'model', text: `Thank you, ${leadFormData.name}. I've synchronized your request with our Elite Desk. An agent will reach out via ${leadFormData.comm} shortly.` }]);
   };
 
