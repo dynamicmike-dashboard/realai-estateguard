@@ -103,13 +103,13 @@ export const chatWithGuard = async (
   const activeKey = getApiKey(apiKey);
   const genAI = new GoogleGenerativeAI(activeKey);
   
-  // Force v1 for stability in chat deployment
+  // Force v1beta for stability in chat deployment
   const model = genAI.getGenerativeModel(
     { 
       model: 'gemini-1.5-flash',
       systemInstruction: `${hydrateInstruction(settings)}\n\nAUTHENTIC PROPERTY DATABASE:\n${JSON.stringify(propertyContext, null, 2)}`
     },
-    { apiVersion: 'v1' }
+    { apiVersion: 'v1beta' }
   );
 
   const chat = model.startChat({ 
