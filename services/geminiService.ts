@@ -108,6 +108,7 @@ async function executeWithFallback<T>(
 
 // --- PROPERTY DATA SCRAPER ---
 
+export const parsePropertyData = async (input: string, apiKey?: string): Promise<any> => {
   // --- URL PROXY LOGIC ---
   let processedInput = input;
   let processingNote = "";
