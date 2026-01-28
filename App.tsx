@@ -135,6 +135,35 @@ const App: React.FC = () => {
     setLeads(prev => prev.map(l => l.id === id ? {...l, status: newStatus} : l));
   };
 
+    // --- PROPERTY SYNC ---
+    useEffect(() => {
+      if (!user || !supabase) return;
+      
+      const fetchProperties = async () => {
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error("Error fetching properties:", error);
+        } else if (data && data.length > 0) {
+            // Merge fetched properties with mock data (or replace if you prefer pure DB)
+            // For this app, we'll PREPEND DB properties to the mock ones so user sees their uploads + examples
+            const dbProperties: PropertySchema[] = data.map((d: any) => d.data);
+            
+            // Deduplicate based on ID just in case
+            const combined = [...dbProperties, ...MOCK_PROPERTIES].filter((p, index, self) => 
+               index === self.findIndex((t) => t.property_id === p.property_id)
+            );
+            
+            setProperties(combined);
+        }
+      };
+
+      fetchProperties();
+    }, [user?.id]);
+
   const handleCaptureLead = async (leadPart: Partial<Lead>) => {
     if (!supabase || !user) return; // Guard
 
@@ -157,6 +186,29 @@ const App: React.FC = () => {
       setLeads(prev => [mapLead(data[0]), ...prev]);
       setNotifications(prev => prev + 1);
     }
+  };
+
+  const handlePropertyAdded = async (newProp: PropertySchema) => {
+      // 1. Optimistic Update
+      setProperties([newProp, ...properties]); 
+      setActiveTab('properties');
+
+      // 2. Persist to Supabase
+      if (!user || !supabase) return;
+
+      const { error } = await supabase.from('properties').insert([{
+          property_id: newProp.property_id,
+          user_id: user.id,
+          address: newProp.listing_details.address,
+          price: newProp.listing_details.price,
+          status: newProp.status,
+          data: newProp // Store full JSON blob
+      }]);
+
+      if (error) {
+          console.error("Failed to save property:", error);
+          alert("Backup failed: " + error.message);
+      }
   };
 
   const updateProperty = (updated: PropertySchema) => {
@@ -348,10 +400,7 @@ const App: React.FC = () => {
             
             {activeTab === 'ingestion' && (
               <IngestionPortal 
-                onPropertyAdded={(p) => { 
-                  setProperties([p, ...properties]); 
-                  setActiveTab('properties'); 
-                }} 
+                onPropertyAdded={handlePropertyAdded} 
                 apiKey={GOOGLE_API_KEY} 
               />
             )}
