@@ -44,18 +44,45 @@ const KNOWN_MODELS = [
   { name: 'gemini-1.0-pro', apiVersion: 'v1' },              // Legacy stable
 ];
 
+// --- DIAGNOSTICS ---
+async function diagnoseConnection(apiKey: string) {
+  try {
+    console.log("[Diagnostic] Attempting to list available models...");
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error("[Diagnostic] API Key Error:", data.error);
+      return;
+    }
+
+    if (data.models) {
+      const modelNames = data.models.map((m: any) => m.name.replace('models/', ''));
+      console.log("[Diagnostic] SUCCESS! Your API Key has access to:", modelNames);
+      console.warn("[Diagnostic] Please update KNOWN_MODELS in geminiService.ts to match one of these.");
+    } else {
+      console.log("[Diagnostic] No models returned", data);
+    }
+  } catch (e) {
+    console.error("[Diagnostic] Network/Fetch failed:", e);
+  }
+}
+
 async function executeWithFallback<T>(
   action: (model: any) => Promise<T>, 
   getApiKey: () => string,
   systemInstruction?: string
 ): Promise<T> {
   const activeKey = getApiKey();
+  if (!activeKey) {
+    throw new Error("Missing Google API Key. Check your .env file.");
+  }
+
   const genAI = new GoogleGenerativeAI(activeKey);
   let lastError: any;
 
   for (const config of KNOWN_MODELS) {
     try {
-      // console.log(`[DEBUG] Trying model: ${config.name} (${config.apiVersion || 'default'})`);
       const modelParams: any = { model: config.name };
       if (systemInstruction) modelParams.systemInstruction = systemInstruction;
       
@@ -65,16 +92,19 @@ async function executeWithFallback<T>(
       const model = genAI.getGenerativeModel(modelParams, requestOptions);
       return await action(model);
     } catch (e: any) {
-      // If 404 (Not Found) or 400 (Bad Request - invalid model), try next
       if (e.message?.includes('404') || e.message?.includes('400') || e.message?.includes('not found')) {
-        console.warn(`[Gemini] Model ${config.name} failed: ${e.message}. Retrying...`);
+        console.warn(`[Gemini] Model ${config.name} failed. Retrying...`);
         lastError = e;
         continue;
       }
-      throw e; // Use the first critical error if it's not a model availability issue
+      throw e; 
     }
   }
-  throw new Error(`All Gemini models failed. Last error: ${lastError?.message || 'Unknown'}`);
+
+  // If we get here, everything failed. Run diagnostics.
+  await diagnoseConnection(activeKey);
+  
+  throw new Error(`All Gemini models failed. Check Console for [Diagnostic] report. Last error: ${lastError?.message || 'Unknown'}`);
 }
 
 // --- PROPERTY DATA SCRAPER ---
