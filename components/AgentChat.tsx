@@ -59,8 +59,8 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
         setIsGated(true);
       }
 
-      // Quick-capture if they just type a number in sandbox
-      const phoneMatch = input.match(/(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/);
+      // Quick-capture: specific US format OR generic 7-15 digit sequences for Intl/Test
+      const phoneMatch = input.match(/(\+\d{1,3}[\s-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/) || input.match(/\d{5,15}/);
       if (phoneMatch) {
         onLeadCaptured({
           name: "Direct Sandbox Lead",
