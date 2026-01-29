@@ -164,6 +164,41 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdate }) => {
                  </span>
              )}
              <button 
+                onClick={async () => {
+                   // DEBUG: Test Database Connection
+                   if (!window.confirm("Run connectivity test? This will attempt to insert a test lead.")) return;
+                   
+                   try {
+                     const { supabase } = await import('./Auth/AuthProvider');
+                     const user = (await supabase.auth.getUser()).data.user;
+                     
+                     if (!user) { alert("AUTH ERROR: No active user session."); return; }
+
+                     const debugData = {
+                         user_id: user.id,
+                         name: "DEBUG CHECK",
+                         property_address: "777 Debug Lane",
+                         property_id: "DEBUG-001",
+                         status: 'New', 
+                         chat_summary: "Test connection payload"
+                     };
+
+                     const { data, error } = await supabase.from('leads').insert([debugData]).select();
+                     
+                     if (error) {
+                         alert("DATABASE ERROR:\n" + JSON.stringify(error, null, 2) + "\n\nLikely cause: Missing columns in 'leads' table. Run the SQL script!");
+                     } else {
+                         alert("SUCCESS: Database connection verified! Test lead inserted.");
+                     }
+                   } catch (e: any) {
+                       alert("SYSTEM ERROR: " + e.message);
+                   }
+                }}
+                className="bg-red-50 text-red-600 px-6 py-4 rounded-2xl font-bold text-xs hover:bg-red-100 transition-colors"
+             >
+                <i className="fa-solid fa-bug mr-2"></i> Test DB
+             </button>
+             <button 
                 onClick={handleSave}
                 disabled={isSaving}
                 className="gold-button px-12 py-4 rounded-2xl font-bold text-sm shadow-2xl shadow-gold/20 flex items-center gap-3 transition-transform active:scale-95 disabled:opacity-50"

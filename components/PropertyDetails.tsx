@@ -48,6 +48,22 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ property, onDelete, o
           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Asset Specification Adjustment</h4>
           <div className="space-y-5">
             <div>
+              <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Asset Category</label>
+              <select 
+                className="w-full px-5 py-4 rounded-2xl border border-slate-200 mt-1 text-sm font-medium focus:ring-2 focus:ring-gold outline-none transition-all appearence-none"
+                value={editedProperty.category}
+                onChange={e => setEditedProperty({
+                  ...editedProperty, 
+                  category: e.target.value as any
+                })}
+              >
+                <option value="Residential">Residential (Domestic)</option>
+                <option value="Commercial">Commercial</option>
+                <option value="Land">Land / Plot</option>
+                <option value="Rental">Rental</option>
+              </select>
+            </div>
+            <div>
               <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Location Address</label>
               <input 
                 className="w-full px-5 py-4 rounded-2xl border border-slate-200 mt-1 text-sm font-medium focus:ring-2 focus:ring-gold outline-none transition-all"
