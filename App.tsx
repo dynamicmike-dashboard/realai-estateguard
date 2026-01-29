@@ -327,8 +327,8 @@ const App: React.FC = () => {
     }
   };
 
-  const agencySlug = settings.businessName.toLowerCase().replace(/\s+/g, '-');
-  const embedCode = `<script \n  src="https://app.estateguard.ai/widget.js" \n  data-agent-id="${agencySlug}" \n  data-theme="gold" \n  async>\n</script>`;
+  // FIXED: Using user.id (UUID) ensures the API can map leads to the correct database row
+  const embedCode = `<script \n  src="https://app.estateguard.ai/widget.js" \n  data-agent-id="${user?.id}" \n  data-theme="gold" \n  async>\n</script>`;
 
   // --- AUTH CHECKMOVED TO RENDER ---
   if (loading) {
