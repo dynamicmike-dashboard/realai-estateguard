@@ -388,7 +388,9 @@ const App: React.FC = () => {
                     <p className="text-[10px] font-black text-gold uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
                        <i className="fa-solid fa-laptop text-gold"></i> Desktop (Chrome / Edge)
                     </p>
-                    <p className="text-xs leading-relaxed font-medium">Click the <b>Install</b> icon <i className="fa-solid fa-download mx-1 text-gold"></i> located at the far right of your address bar.</p>
+                    <p className="text-xs leading-relaxed font-medium">
+                        Click the <b>Install</b> icon <i className="fa-solid fa-download mx-1 text-gold"></i> in your address bar, OR open the <b>Browser Menu</b> <i className="fa-solid fa-ellipsis-vertical mx-1"></i> and select <b>"Install App"</b>.
+                    </p>
                   </div>
                </div>
            </div>})}>
