@@ -102,9 +102,15 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ property, onDelete, o
 
             {/* AI Training Data Fields */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200">
-               <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                 <i className="fa-solid fa-graduation-cap text-gold"></i> AI Training Data
-               </h5>
+               <div className="mb-4">
+                 <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
+                   <i className="fa-solid fa-graduation-cap text-gold"></i> AI Training Data
+                 </h5>
+                 <p className="text-[10px] text-slate-500 font-medium leading-relaxed max-w-sm">
+                   <i className="fa-solid fa-circle-info mr-1 text-gold/70"></i>
+                   Add personalized local knowledge below. The AI Concierge uses this "Secret Intel" to build trust and convert leads.
+                 </p>
+               </div>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Waterfront Proximity</label>

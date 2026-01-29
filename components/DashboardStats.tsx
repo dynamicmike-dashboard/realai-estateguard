@@ -77,23 +77,27 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) =>
         </div>
       </div>
 
-      {/* Intensity Section */}
+      {/* Lead Status Pipeline */}
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-        <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">Asset Interaction Intensity</h3>
-        {/* FIXED: Explicit dimensions added here as well */}
+        <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">Lead Pipeline Status</h3>
         <div style={{ width: '100%', height: 300, minHeight: 300 }}>
           <ResponsiveContainer width="99%" height={300}>
-            <BarChart data={properties.slice(0, 5).map(p => ({ name: p.property_id, hits: Math.floor(Math.random() * 80) + 20 }))}>
+            <BarChart data={[
+                { name: 'New', count: leads.filter(l => l.status === 'New').length },
+                { name: 'Qualified', count: leads.filter(l => l.status === 'Qualified').length },
+                { name: 'Showing', count: leads.filter(l => l.status === 'Showing').length },
+                { name: 'Closed', count: leads.filter(l => l.status === 'Closed').length },
+            ]}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} />
-              <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} />
+              <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} allowDecimals={false} />
               <Tooltip 
                 cursor={{fill: '#f8fafc'}}
                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
               />
-              <Bar dataKey="hits" radius={[6, 6, 0, 0]}>
-                {properties.slice(0, 5).map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#d4af37' : '#111827'} />
+              <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                {['New', 'Qualified', 'Showing', 'Closed'].map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={index === 3 ? '#10b981' : '#d4af37'} />
                 ))}
               </Bar>
             </BarChart>

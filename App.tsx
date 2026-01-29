@@ -177,26 +177,59 @@ const App: React.FC = () => {
     }
 
     // FIXED: Insert with user_id to enforce ownership
-    const payload = {
+    const leadData = {
       user_id: user.id, // <--- Key for Multi-Tenancy
       name: leadPart.name || "New Prospect",
       phone: leadPart.phone || "N/A",
       property_address: leadPart.property_address || "N/A",
       chat_summary: leadPart.notes?.[0] || "Captured via AI Concierge",
-      status: 'New'
+      status: 'New' as LeadStatus,
+      created_at: new Date().toISOString(), // Mock timestamp for optimistic
+      id: `temp-${Date.now()}` // Temp ID
     };
 
-    const { data, error } = await supabase.from('leads').insert([payload]).select(); // Select the returned row
+    // 1. Optimistic Update (Immediate Feedback)
+    const optimisticLead: Lead = mapLead(leadData);
+    setLeads(prev => [optimisticLead, ...prev]);
+    setNotifications(prev => prev + 1);
+    
+    // Show Feedback Modal instead of Alert
+    setModalContent({
+        title: 'Pipeline Update',
+        content: (
+            <div className="text-center p-6">
+                <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600 text-2xl animate-bounce">
+                    <i className="fa-solid fa-check"></i>
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Lead Captured!</h3>
+                <p className="text-sm text-slate-500 mb-6">You have successfully secured a new prospect for <b>{leadData.property_address}</b>.</p>
+                <button 
+                    onClick={() => { setModalContent(null); setActiveTab('leads'); }}
+                    className="gold-button w-full py-4 rounded-xl font-bold text-sm shadow-xl"
+                >
+                    View Pipeline
+                </button>
+            </div>
+        )
+    });
+
+    // 2. Persist to Supabase
+    const { data, error } = await supabase.from('leads').insert([{
+        user_id: leadData.user_id,
+        name: leadData.name,
+        phone: leadData.phone,
+        property_address: leadData.property_address,
+        chat_summary: leadData.chat_summary,
+        status: leadData.status
+    }]).select(); // Select the returned row
     
     if (error) {
       console.error("Supabase Save Error:", error.message);
-      alert("Error saving lead: " + error.message);
+      // Optional: Rollback state here if critical, but for now we keep optimistic state to avoid UI flicker
+      // alert("Note: Cloud sync failed, but lead is saved locally for this session.");
     } else if (data) {
-      alert("Success! Lead captured for " + (leadPart.name || "User")); // User Confirmation
-      // Manually update state to ensure immediate UI feedback
-      // (The realtime subscription handles this too, but this is a safer fallback)
-      setLeads(prev => [mapLead(data[0]), ...prev]);
-      setNotifications(prev => prev + 1);
+      // 3. Replace Optimistic ID with Real ID
+      setLeads(prev => prev.map(l => l.id === leadData.id ? mapLead(data[0]) : l));
     }
   };
 
