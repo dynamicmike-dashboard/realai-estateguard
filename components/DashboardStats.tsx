@@ -8,17 +8,53 @@ interface DashboardStatsProps {
 }
 
 const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) => {
-  const data = [
-    { name: 'Mon', leads: 4 },
-    { name: 'Tue', leads: 7 },
-    { name: 'Wed', leads: 5 },
-    { name: 'Thu', leads: 12 },
-    { name: 'Fri', leads: 9 },
-    { name: 'Sat', leads: 15 },
-    { name: 'Sun', leads: 11 },
-  ];
+  // --- REAL DATA AGGREGATION ---
+  
+  // 1. Calculate Weekly Heatmap Data
+  const getLast7Days = () => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const today = new Date();
+    const last7: { name: string, leads: number, date: string }[] = [];
 
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        last7.push({
+            name: days[d.getDay()],
+            leads: 0,
+            date: d.toISOString().split('T')[0] // YYYY-MM-DD
+        });
+    }
+    return last7;
+  };
+
+  const chartData = getLast7Days().map(day => {
+      // Count leads that match this date
+      const count = leads.filter(l => {
+          if (!l.timestamp && !l.created_at) return false;
+          // Handle both Supabase format (created_at) and local (timestamp)
+          const dateStr = (l.created_at || l.timestamp).split('T')[0];
+          return dateStr === day.date;
+      }).length;
+      return { name: day.name, leads: count };
+  });
+
+  // 2. Calculate Real Metrics
   const estateGuardCount = properties.filter(p => p.tier === 'Estate Guard').length;
+  
+  // Conversion Rate (Closed / Total)
+  const closedCount = leads.filter(l => l.status === 'Closed').length;
+  const conversionRate = leads.length > 0 
+      ? Math.round((closedCount / leads.length) * 100) 
+      : 0;
+  
+  // Real Capture (Leads in last 30 days) - Mocking "Sessions" is impossible without analytics, 
+  // so we switch to "Monthly Volume"
+  const leadsThisMonth = leads.filter(l => {
+      const d = new Date(l.created_at || l.timestamp);
+      const now = new Date();
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
 
   return (
     <div className="space-y-6">
@@ -32,10 +68,10 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) =>
           </div>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Qualified Leads</p>
+          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Total Leads</p>
           <p className="text-2xl font-bold mt-1">{leads.length}</p>
           <div className="mt-2 text-gold text-xs font-semibold">
-            <i className="fa-solid fa-fire mr-1"></i> Engagement active
+            <i className="fa-solid fa-fire mr-1"></i> All Time
           </div>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
@@ -46,21 +82,21 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) =>
           </div>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Capture Rate</p>
-          <p className="text-2xl font-bold mt-1">68%</p>
+          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Conversion Rate</p>
+          <p className="text-2xl font-bold mt-1">{conversionRate}%</p>
           <div className="mt-2 text-emerald-600 text-xs font-semibold">
-            <i className="fa-solid fa-chart-line mr-1"></i> Optimal conversion
+            <i className="fa-solid fa-chart-line mr-1"></i> {closedCount} Closed Deals
           </div>
         </div>
       </div>
 
       {/* Heatmap Section */}
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-        <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">Lead Acquisition Heatmap</h3>
+        <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">Lead Acquisition Heatmap (Last 7 Days)</h3>
         {/* FIXED: Explicit height and min-height to prevent width(-1) warnings */}
         <div style={{ width: '100%', height: 300, minHeight: 300 }}>
           <ResponsiveContainer width="99%" height={300}>
-            <AreaChart data={data}>
+            <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#d4af37" stopOpacity={0.3}/>
@@ -69,7 +105,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) =>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} />
-              <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} />
+              <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} allowDecimals={false} />
               <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
               <Area type="monotone" dataKey="leads" stroke="#d4af37" strokeWidth={3} fillOpacity={1} fill="url(#colorLeads)" />
             </AreaChart>

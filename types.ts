@@ -62,6 +62,7 @@ export interface Lead {
   property_address: string;
   status: LeadStatus;
   timestamp: string;
+  created_at?: string; // Added for DB compatibility
   notes: string[];
 }
 

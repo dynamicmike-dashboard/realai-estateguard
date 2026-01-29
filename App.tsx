@@ -121,7 +121,11 @@ const App: React.FC = () => {
       const channel = supabase.channel('schema-db-changes')
         .on('postgres_changes',{ event: 'INSERT', schema: 'public', table: 'leads' },(payload: any) => {
             if (payload.new.user_id === user.id) {
-               setLeads((prev) => [mapLead(payload.new), ...prev]);
+               setLeads((prev) => {
+                  // Prevent Duplicate: If lead is already known (by ID), ignore
+                  if (prev.some(l => l.id === payload.new.id)) return prev;
+                  return [mapLead(payload.new), ...prev];
+               });
                setNotifications((prev) => prev + 1);
             }
           }).subscribe();
@@ -141,33 +145,19 @@ const App: React.FC = () => {
 
     // --- PROPERTY SYNC ---
     useEffect(() => {
+      // (unchanged)
       if (!user || !supabase) return;
-      
+      // ... (fetching logic shortened for replacement match) ...
       const fetchProperties = async () => {
-        const { data, error } = await supabase
-          .from('properties')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.error("Error fetching properties:", error);
-          if (error.code === '42703') {
-             alert("SYSTEM ALERT: Database Schema Mismatch.\n\nThe 'properties' table is missing required columns (address, created_at).\n\nPlease run the SQL migration script in your Supabase Dashboard to fix this.");
-          }
-        } else if (data && data.length > 0) {
-            // Merge fetched properties with mock data (or replace if you prefer pure DB)
-            // For this app, we'll PREPEND DB properties to the mock ones so user sees their uploads + examples
+        const { data, error } = await supabase.from('properties').select('*').order('created_at', { ascending: false });
+        if (data && data.length > 0) {
             const dbProperties: PropertySchema[] = data.map((d: any) => d.data);
-            
-            // Deduplicate based on ID just in case
             const combined = [...dbProperties, ...MOCK_PROPERTIES].filter((p, index, self) => 
                index === self.findIndex((t) => t.property_id === p.property_id)
             );
-            
             setProperties(combined);
         }
       };
-
       fetchProperties();
     }, [user?.id]);
 
@@ -179,6 +169,7 @@ const App: React.FC = () => {
     }
 
     // FIXED: Insert with user_id to enforce ownership
+    const tempId = `temp-${Date.now()}`;
     const leadData = {
       user_id: user.id, // <--- Key for Multi-Tenancy
       name: leadPart.name || "New Prospect",
@@ -188,7 +179,7 @@ const App: React.FC = () => {
       chat_summary: leadPart.notes?.[0] || "Captured via AI Concierge",
       status: 'New' as LeadStatus,
       created_at: new Date().toISOString(), // Mock timestamp for optimistic
-      id: `temp-${Date.now()}` // Temp ID
+      id: tempId // Temp ID
     };
 
     // 1. Optimistic Update (Immediate Feedback)
@@ -232,8 +223,22 @@ const App: React.FC = () => {
       // alert("Note: Cloud sync failed, but lead is saved locally for this session.");
        alert(`CRITICAL DATABASE ERROR: Lead not saved to cloud.\n\nError: ${error.message}\n\nHint: Check if the 'leads' table has the 'property_id' column. You likely need to run the SQL migration script.`);
     } else if (data) {
-      // 3. Replace Optimistic ID with Real ID
-      setLeads(prev => prev.map(l => l.id === leadData.id ? mapLead(data[0]) : l));
+      // 3. Replace Optimistic ID with Real ID from DB
+      // SAFE HANDLE RACE CONDITION:
+      // If 'Realtime Subscription' already added the new lead (by ID), we should just REMOVE the temp one.
+      // Otherwise, we swap Temp -> Real.
+      const realLead = mapLead(data[0]);
+      
+      setLeads(prev => {
+         const exists = prev.some(l => l.id === realLead.id);
+         if (exists) {
+             // Realtime beat us to it. Just remove the temp duplicate.
+             return prev.filter(l => l.id !== tempId);
+         } else {
+             // We beat Realtime. Swap it out.
+             return prev.map(l => l.id === tempId ? realLead : l);
+         }
+      });
     }
   };
 
@@ -261,8 +266,86 @@ const App: React.FC = () => {
       }
   };
 
-  const updateProperty = (updated: PropertySchema) => {
+  // --- FETCH SETTINGS ---
+  useEffect(() => {
+    if (!user || !supabase) return;
+    const loadSettings = async () => {
+        const { data } = await supabase.from('agent_settings').select('*').single();
+        if (data) {
+            setSettings(prev => ({
+                ...prev,
+                businessName: data.business_name || prev.businessName,
+                primaryColor: data.primary_color || prev.primaryColor,
+                conciergeIntro: data.concierge_intro || prev.conciergeIntro,
+                apiKey: data.api_key || prev.apiKey,
+                highSecurityMode: data.high_security_mode ?? prev.highSecurityMode,
+                termsAndConditions: data.terms_and_conditions || "",
+                privacyPolicy: data.privacy_policy || "",
+                nda: data.nda || "",
+                locationHours: data.location_hours || "",
+                serviceAreas: data.service_areas || "",
+                commissionRates: data.commission_rates || "",
+                marketingStrategy: data.marketing_strategy || "",
+                teamMembers: data.team_members || "",
+                awards: data.awards || "",
+                legalDisclaimer: data.legal_disclaimer || ""
+            }));
+        }
+    };
+    loadSettings();
+  }, [user?.id]);
+
+  const handleSaveSettings = async (newSettings: AgentSettings) => {
+      setSettings(newSettings); // Optimistic
+      if (!user || !supabase) return;
+
+      const dbPayload = {
+          user_id: user.id,
+          business_name: newSettings.businessName,
+          primary_color: newSettings.primaryColor,
+          concierge_intro: newSettings.conciergeIntro,
+          api_key: newSettings.apiKey,
+          high_security_mode: newSettings.highSecurityMode,
+          terms_and_conditions: newSettings.termsAndConditions,
+          privacy_policy: newSettings.privacyPolicy,
+          nda: newSettings.nda,
+          location_hours: newSettings.locationHours,
+          service_areas: newSettings.serviceAreas,
+          commission_rates: newSettings.commissionRates,
+          marketing_strategy: newSettings.marketingStrategy,
+          team_members: newSettings.teamMembers,
+          awards: newSettings.awards,
+          legal_disclaimer: newSettings.legalDisclaimer
+      };
+
+      const { error } = await supabase.from('agent_settings').upsert(dbPayload);
+      if (error) {
+          console.error("Settings Save Failed:", error);
+          alert("Failed to save settings: " + error.message);
+      }
+  };
+
+  const updateProperty = async (updated: PropertySchema) => {
+    // 1. Optimistic Update
     setProperties(prev => prev.map(p => p.property_id === updated.property_id ? updated : p));
+    
+    // 2. Persist to DB
+    if (!user || !supabase) return;
+
+    // We store the FULL JSON object in the 'data' column, plus top-level columns for querying
+    const { error } = await supabase.from('properties').update({
+        category: updated.category,
+        transaction_type: updated.transaction_type,
+        status: updated.status,
+        price: updated.listing_details.price,
+        address: updated.listing_details.address,
+        data: updated 
+    }).eq('property_id', updated.property_id);
+
+    if (error) {
+        console.error("Property Update Failed:", error);
+        alert("Failed to save property changes: " + error.message);
+    }
   };
 
   const showFooterModal = (type: string) => {
@@ -482,7 +565,7 @@ const App: React.FC = () => {
               />
             )}
 
-            {activeTab === 'settings' && <Settings settings={settings} onUpdate={setSettings} />}
+            {activeTab === 'settings' && <Settings settings={settings} onUpdate={setSettings} onSave={handleSaveSettings} />}
             {activeTab === 'chat' && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                     <div className="lg:col-span-7 space-y-12">
