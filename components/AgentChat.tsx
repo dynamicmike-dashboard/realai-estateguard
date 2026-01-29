@@ -4,7 +4,7 @@ import { PropertySchema, ChatMessage, Lead, AgentSettings, PropertyTier } from '
 
 interface AgentChatProps {
   property: PropertySchema;
-  onLeadCaptured: (lead: Partial<Lead>) => void;
+  onLeadCaptured: (lead: Partial<Lead>, silent?: boolean) => void;
   settings: AgentSettings;
 }
 
@@ -67,7 +67,7 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
           phone: phoneMatch[0],
           property_id: property.property_id,
           property_address: property.listing_details.address,
-        });
+        }, true); // Silent mode: true
       }
     } catch (e) {
       setMessages(prev => [...prev, { role: 'model', text: "Sorry, the office is very busy today, please continue to enjoy browsing our portfolio." }]);

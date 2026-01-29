@@ -51,7 +51,7 @@ export interface PropertySchema {
   };
 }
 
-export type LeadStatus = 'New' | 'Discovery' | 'Qualified' | 'Showing' | 'Negotiation' | 'Closed';
+export type LeadStatus = 'New' | 'Discovery' | 'Qualified' | 'Showing' | 'Negotiation' | 'Closed' | 'Archived';
 
 export interface Lead {
   id: string;

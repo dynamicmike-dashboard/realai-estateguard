@@ -9,6 +9,8 @@ import Kanban from './components/Kanban';
 import Settings from './components/Settings';
 import PropertyDetails from './components/PropertyDetails';
 import UserManual from './components/UserManual';
+import LeadDetailsModal from './components/LeadDetailsModal';
+import LeadDetailsModal from './components/LeadDetailsModal'; // Added import
 import { PropertySchema, Lead, PropertyTier, AgentSettings, LeadStatus } from './types';
 
 // Auth & Database Imports
@@ -90,6 +92,7 @@ const App: React.FC = () => {
   const [modalContent, setModalContent] = useState<{title: string, content: React.ReactNode} | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [notifications, setNotifications] = useState(0);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
   // FIXED: Mapping helper to match 'name' and 'phone' columns in Supabase schema
   const mapLead = (d: any): Lead => ({
@@ -143,6 +146,23 @@ const App: React.FC = () => {
     setLeads(prev => prev.map(l => l.id === id ? {...l, status: newStatus} : l));
   };
 
+  const updateLead = async (id: string, updates: Partial<Lead>) => {
+    // Optimistic Update
+    setLeads(prev => prev.map(l => l.id === id ? {...l, ...updates} : l));
+    if (selectedLead && selectedLead.id === id) {
+        setSelectedLead(prev => prev ? {...prev, ...updates} : null);
+    }
+    // DB Update
+    if(supabase) await supabase.from('leads').update(updates).eq('id', id);
+  };
+  
+  const deleteLead = async (id: string) => {
+    if(!supabase) return;
+    setLeads(prev => prev.filter(l => l.id !== id));
+    setSelectedLead(null);
+    await supabase.from('leads').delete().eq('id', id);
+  };
+
     // --- PROPERTY SYNC ---
     useEffect(() => {
       // (unchanged)
@@ -161,7 +181,7 @@ const App: React.FC = () => {
       fetchProperties();
     }, [user?.id]);
 
-  const handleCaptureLead = async (leadPart: Partial<Lead>) => {
+  const handleCaptureLead = async (leadPart: Partial<Lead>, silent: boolean = false) => {
     console.log("Attempting capture:", leadPart); // Debug log
     if (!supabase || !user) {
         alert("System Error: Auth or Database connection missing.");
@@ -185,27 +205,29 @@ const App: React.FC = () => {
     // 1. Optimistic Update (Immediate Feedback)
     const optimisticLead: Lead = mapLead(leadData);
     setLeads(prev => [optimisticLead, ...prev]);
-    setNotifications(prev => prev + 1);
+    if (!silent) setNotifications(prev => prev + 1);
     
-    // Show Feedback Modal instead of Alert
-    setModalContent({
-        title: 'Pipeline Update',
-        content: (
-            <div className="text-center p-6">
-                <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600 text-2xl animate-bounce">
-                    <i className="fa-solid fa-check"></i>
+    // Show Feedback Modal ONLY if NOT silent
+    if (!silent) {
+        setModalContent({
+            title: 'Pipeline Update',
+            content: (
+                <div className="text-center p-6">
+                    <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600 text-2xl animate-bounce">
+                        <i className="fa-solid fa-check"></i>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Lead Captured!</h3>
+                    <p className="text-sm text-slate-500 mb-6">You have successfully secured a new prospect for <b>{leadData.property_address}</b>.</p>
+                    <button 
+                        onClick={() => { setModalContent(null); setActiveTab('leads'); }}
+                        className="gold-button w-full py-4 rounded-xl font-bold text-sm shadow-xl"
+                    >
+                        View Pipeline
+                    </button>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Lead Captured!</h3>
-                <p className="text-sm text-slate-500 mb-6">You have successfully secured a new prospect for <b>{leadData.property_address}</b>.</p>
-                <button 
-                    onClick={() => { setModalContent(null); setActiveTab('leads'); }}
-                    className="gold-button w-full py-4 rounded-xl font-bold text-sm shadow-xl"
-                >
-                    View Pipeline
-                </button>
-            </div>
-        )
-    });
+            )
+        });
+    }
 
     // 2. Persist to Supabase
     const { data, error } = await supabase.from('leads').insert([{
@@ -555,7 +577,19 @@ const App: React.FC = () => {
                     </div>
                 </div>
             )}
-            {activeTab === 'leads' && <Kanban leads={leads} onStatusChange={handleStatusChange} />}
+            {activeTab === 'leads' && (
+                <>
+                  <Kanban leads={leads} onStatusChange={handleStatusChange} onSelect={setSelectedLead} />
+                  {selectedLead && (
+                      <LeadDetailsModal 
+                          lead={selectedLead} 
+                          onClose={() => setSelectedLead(null)} 
+                          onUpdate={updateLead}
+                          onDelete={deleteLead}
+                      />
+                  )}
+                </>
+            )}
             {activeTab === 'manual' && <UserManual />}
             
             {activeTab === 'ingestion' && (

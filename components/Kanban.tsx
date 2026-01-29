@@ -4,15 +4,16 @@ import { Lead, LeadStatus } from '../types';
 interface KanbanProps {
   leads: Lead[];
   onStatusChange: (id: string, newStatus: LeadStatus) => void;
+  onSelect: (lead: Lead) => void; // Added onSelect
 }
 
 const COLUMNS: LeadStatus[] = ['New', 'Discovery', 'Qualified', 'Showing', 'Negotiation', 'Closed'];
 
-const Kanban: React.FC<KanbanProps> = ({ leads, onStatusChange }) => {
+const Kanban: React.FC<KanbanProps> = ({ leads, onStatusChange, onSelect }) => {
   return (
-    <div className="flex gap-6 overflow-x-auto pb-8 no-scrollbar min-h-[600px]">
+    <div className="flex gap-6 overflow-x-auto pb-8 min-h-[600px] snap-x snap-mandatory px-4 md:px-0">
       {COLUMNS.map(col => (
-        <div key={col} className="flex-shrink-0 w-80">
+        <div key={col} className="flex-shrink-0 w-[85vw] md:w-80 snap-center">
           <div className="flex items-center justify-between mb-4 px-2">
             <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-gold"></span>
@@ -27,7 +28,8 @@ const Kanban: React.FC<KanbanProps> = ({ leads, onStatusChange }) => {
             {leads.filter(l => l.status === col).map(lead => (
               <div 
                 key={lead.id} 
-                className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow cursor-pointer group"
+                onClick={() => onSelect(lead)} // Trigger details modal on card click
+                className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow cursor-pointer group relative"
               >
                 <div className="flex justify-between items-start mb-2">
                   <p className="font-bold text-slate-800 text-sm">{lead.name}</p>
@@ -42,7 +44,8 @@ const Kanban: React.FC<KanbanProps> = ({ leads, onStatusChange }) => {
                    <div className="flex -space-x-1">
                       {lead.notes.length > 0 && <span className="w-5 h-5 bg-gold/10 text-gold rounded-full flex items-center justify-center text-[8px] border border-gold/20"><i className="fa-solid fa-comment"></i></span>}
                    </div>
-                   <div className="flex gap-1">
+                   <div className="flex gap-1" onClick={(e) => e.stopPropagation()}> 
+                      {/* Prevent modal opening when clicking action button */}
                       {col !== 'Closed' && (
                         <button 
                           onClick={() => onStatusChange(lead.id, COLUMNS[COLUMNS.indexOf(col) + 1])}
