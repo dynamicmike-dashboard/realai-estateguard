@@ -219,7 +219,7 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
             <button 
               onClick={handleSend}
               disabled={isGated}
-              className="w-14 h-14 bg-slate-950 text-gold rounded-2xl flex items-center justify-center hover:bg-slate-900 transition-all active:scale-95 shadow-xl shadow-gold/5 disabled:opacity-30"
+              className="w-14 h-14 bg-gold text-slate-950 rounded-2xl flex items-center justify-center hover:bg-amber-400 transition-all active:scale-95 shadow-xl shadow-gold/20 disabled:opacity-30 disabled:shadow-none"
             >
               <i className="fa-solid fa-paper-plane"></i>
             </button>

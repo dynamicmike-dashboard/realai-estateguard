@@ -149,6 +149,9 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
      - If you see "3 Bed" or "3bd", set 'bedrooms' to 3.
      - If you see "2.5 Bath" or "2ba", set 'bathrooms' to 2.5.
      - If you find the price in the text (e.g. "$1,250,000"), USE IT.
+     - TRANSACTION TYPE:
+       - If you see "Rent", "Per Month", "/mo", or "Lease", set 'transaction_type' to 'Rent' or 'Lease'.
+       - Default to 'Sale' if unclear.
   3. If the input was JUST a URL and scraping failed:
      - Try to extract the address from the URL slug.
      - Set 'hero_narrative' to: "Linked Property (Data Pending). Please paste the full description text."
@@ -159,7 +162,8 @@ export const parsePropertyData = async (input: string, apiKey?: string): Promise
   You must return a JSON object strictly following this schema:
   {
     "property_id": "EG-${Math.floor(Math.random() * 1000)}",
-    "category": "Residential" | "Commercial",
+    "category": "Residential" | "Commercial" | "Land",
+    "transaction_type": "Sale" | "Rent" | "Lease",
     "status": "Active",
     "tier": "Standard" | "Estate Guard",
     "listing_details": {

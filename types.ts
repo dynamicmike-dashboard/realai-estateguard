@@ -3,12 +3,15 @@ export enum PropertyTier {
   ESTATE_GUARD = 'Estate Guard'
 }
 
-export type PropertyCategory = 'Residential' | 'Commercial' | 'Land' | 'Rental';
+export type PropertyCategory = 'Residential' | 'Commercial' | 'Land';
+
+export type TransactionType = 'Sale' | 'Rent' | 'Lease';
 
 export interface PropertySchema {
   property_id: string;
   user_id?: string; // Links property to specific agent
   category: PropertyCategory;
+  transaction_type: TransactionType; // Added new field
   status: 'Active' | 'Pending' | 'Sold' | 'Rented';
   tier: PropertyTier;
   visibility_protocol: {

@@ -38,6 +38,7 @@ const MOCK_PROPERTIES: PropertySchema[] = [
   {
     property_id: "EG-770",
     category: 'Residential',
+    transaction_type: 'Sale',
     status: "Active",
     tier: PropertyTier.ESTATE_GUARD,
     visibility_protocol: {
@@ -62,6 +63,7 @@ const MOCK_PROPERTIES: PropertySchema[] = [
   {
     property_id: "EG-212",
     category: 'Commercial',
+    transaction_type: 'Lease',
     status: "Active",
     tier: PropertyTier.STANDARD,
     visibility_protocol: { public_fields: ["address"], gated_fields: ["mechanical_specs"] },
@@ -227,8 +229,8 @@ const App: React.FC = () => {
     
     if (error) {
       console.error("Supabase Save Error:", error.message);
-      // Optional: Rollback state here if critical, but for now we keep optimistic state to avoid UI flicker
       // alert("Note: Cloud sync failed, but lead is saved locally for this session.");
+       alert(`CRITICAL DATABASE ERROR: Lead not saved to cloud.\n\nError: ${error.message}\n\nHint: Check if the 'leads' table has the 'property_id' column. You likely need to run the SQL migration script.`);
     } else if (data) {
       // 3. Replace Optimistic ID with Real ID
       setLeads(prev => prev.map(l => l.id === leadData.id ? mapLead(data[0]) : l));
