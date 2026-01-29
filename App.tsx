@@ -182,6 +182,7 @@ const App: React.FC = () => {
       name: leadPart.name || "New Prospect",
       phone: leadPart.phone || "N/A",
       property_address: leadPart.property_address || "N/A",
+      property_id: leadPart.property_id || "General", // ADDED: Critical for DB constraints
       chat_summary: leadPart.notes?.[0] || "Captured via AI Concierge",
       status: 'New' as LeadStatus,
       created_at: new Date().toISOString(), // Mock timestamp for optimistic
@@ -219,6 +220,7 @@ const App: React.FC = () => {
         name: leadData.name,
         phone: leadData.phone,
         property_address: leadData.property_address,
+        property_id: leadData.property_id, // ADDED: Persist ID
         chat_summary: leadData.chat_summary,
         status: leadData.status
     }]).select(); // Select the returned row
@@ -517,7 +519,8 @@ const App: React.FC = () => {
                                             </span>
                                         </p>
                                         <p className="text-sm text-slate-600 mt-4 leading-relaxed font-medium">
-                                           When active, the AI concierge will gate sensitive specifics (appraisals, notes) until lead qualification is verified.
+                                           <b className="text-slate-900">SECURE:</b> Gates sensitive fields (appraisals, notes) until qualification.<br/>
+                                           <b className="text-slate-900">OPEN:</b> Removes all friction; all property data is public.
                                         </p>
                                     </div>
                                     <button 
