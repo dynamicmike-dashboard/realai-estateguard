@@ -103,7 +103,59 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdate }) => {
                     />
                 </div>
             </div>
-          </section>
+            </section>
+
+            {/* Business Knowledge Base */}
+            <section>
+                <h3 className="font-bold text-slate-800 mb-8 flex items-center gap-4 text-lg">
+                  <i className="fa-solid fa-briefcase text-gold"></i> 
+                  Business Knowledge Base
+                </h3>
+                <p className="text-sm text-slate-500 mb-6">Train your AI agent on your specific business details. Fill in as many as possible.</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Terms & Conditions</label>
+                        <textarea rows={3} value={settings.termsAndConditions} onChange={(e) => onUpdate({...settings, termsAndConditions: e.target.value})} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold outline-none transition-all font-medium text-sm" />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Privacy Policy</label>
+                        <textarea rows={3} value={settings.privacyPolicy} onChange={(e) => onUpdate({...settings, privacyPolicy: e.target.value})} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold outline-none transition-all font-medium text-sm" />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">NDA / Confidentiality</label>
+                        <textarea rows={3} value={settings.nda} onChange={(e) => onUpdate({...settings, nda: e.target.value})} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold outline-none transition-all font-medium text-sm" />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Location & Opening Hours</label>
+                        <textarea rows={3} value={settings.locationHours} onChange={(e) => onUpdate({...settings, locationHours: e.target.value})} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold outline-none transition-all font-medium text-sm" />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Service Areas</label>
+                        <textarea rows={3} value={settings.serviceAreas} onChange={(e) => onUpdate({...settings, serviceAreas: e.target.value})} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold outline-none transition-all font-medium text-sm" />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Commission Rates</label>
+                        <textarea rows={3} value={settings.commissionRates} onChange={(e) => onUpdate({...settings, commissionRates: e.target.value})} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold outline-none transition-all font-medium text-sm" />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Marketing Strategy</label>
+                        <textarea rows={3} value={settings.marketingStrategy} onChange={(e) => onUpdate({...settings, marketingStrategy: e.target.value})} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold outline-none transition-all font-medium text-sm" />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Team Members</label>
+                        <textarea rows={3} value={settings.teamMembers} onChange={(e) => onUpdate({...settings, teamMembers: e.target.value})} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold outline-none transition-all font-medium text-sm" />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Awards & Recognition</label>
+                        <textarea rows={3} value={settings.awards} onChange={(e) => onUpdate({...settings, awards: e.target.value})} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold outline-none transition-all font-medium text-sm" />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Legal Disclaimer</label>
+                        <textarea rows={3} value={settings.legalDisclaimer} onChange={(e) => onUpdate({...settings, legalDisclaimer: e.target.value})} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold outline-none transition-all font-medium text-sm" />
+                    </div>
+                </div>
+            </section>
 
           <div className="pt-10 border-t border-slate-100 flex justify-end items-center gap-6">
              {saveSuccess && (

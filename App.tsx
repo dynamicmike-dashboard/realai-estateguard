@@ -8,6 +8,7 @@ import Modal from './components/Modal';
 import Kanban from './components/Kanban';
 import Settings from './components/Settings';
 import PropertyDetails from './components/PropertyDetails';
+import UserManual from './components/UserManual';
 import { PropertySchema, Lead, PropertyTier, AgentSettings, LeadStatus } from './types';
 
 // Auth & Database Imports
@@ -81,6 +82,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [settings, setSettings] = useState<AgentSettings>(INITIAL_SETTINGS);
   const [properties, setProperties] = useState<PropertySchema[]>(MOCK_PROPERTIES);
+  const [searchTerm, setSearchTerm] = useState(''); // Search State
   const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [modalContent, setModalContent] = useState<{title: string, content: React.ReactNode} | null>(null);
@@ -387,6 +389,7 @@ const App: React.FC = () => {
                 {activeTab === 'settings' && 'Identity & Branding'}
                 {activeTab === 'chat' && 'Concierge Deployment'}
                 {activeTab === 'ingestion' && 'Asset Onboarding'}
+                {activeTab === 'manual' && 'Operating Manual'}
               </h2>
             </div>
           </header>
@@ -394,20 +397,44 @@ const App: React.FC = () => {
           <div className="pb-20">
             {activeTab === 'dashboard' && <DashboardStats properties={properties} leads={leads} />}
             {activeTab === 'properties' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                    {properties.map(p => (
-                        <PropertyCard 
-                          key={p.property_id} 
-                          property={p} 
-                          onSelect={(p) => { 
-                            setSelectedPropertyId(p.property_id); 
-                            setIsDetailsOpen(true); 
-                          }} 
+                <div className="space-y-6">
+                    {/* Search Bar */}
+                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <i className="fa-solid fa-magnifying-glass text-slate-400 ml-2"></i>
+                        <input 
+                            type="text" 
+                            placeholder="Search portfolio by address, price, or status..." 
+                            className="flex-1 bg-transparent outline-none text-slate-700 font-medium placeholder:text-slate-400"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                         />
-                    ))}
+                         {searchTerm && (
+                            <button onClick={() => setSearchTerm('')} className="text-slate-400 hover:text-slate-600">
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                        {properties.filter(p => 
+                            p.listing_details.address.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            p.listing_details.price.toString().includes(searchTerm) ||
+                            p.status.toLowerCase().includes(searchTerm.toLowerCase())
+                        ).map(p => (
+                            <PropertyCard 
+                              key={p.property_id} 
+                              property={p} 
+                              onSelect={(p) => { 
+                                setSelectedPropertyId(p.property_id); 
+                                setIsDetailsOpen(true); 
+                              }} 
+                            />
+                        ))}
+                    </div>
                 </div>
             )}
             {activeTab === 'leads' && <Kanban leads={leads} onStatusChange={handleStatusChange} />}
+            {activeTab === 'manual' && <UserManual />}
             
             {activeTab === 'ingestion' && (
               <IngestionPortal 

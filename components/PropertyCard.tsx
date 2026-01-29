@@ -23,8 +23,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onSelect }) => {
         />
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           <div className="flex gap-2">
-            <span className={`px-4 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest ${
-              property.status === 'Active' ? 'bg-emerald-500 text-white' : 'bg-gold text-slate-900'
+            <span className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${
+              property.status === 'Active' 
+                ? 'bg-emerald-500 text-white shadow-emerald-500/30 shadow-lg' 
+                : 'bg-amber-400 text-slate-900 shadow-md' // High contrast for Pending/Draft
             }`}>
               {property.status}
             </span>

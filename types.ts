@@ -39,6 +39,13 @@ export interface PropertySchema {
     motivation: string;
     showing_instructions: string;
   };
+  ai_training?: {
+      proximityWaterfront?: string;
+      commuteTime?: string;
+      schools?: string;
+      hospitals?: string;
+      supermarkets?: string;
+  };
 }
 
 export type LeadStatus = 'New' | 'Discovery' | 'Qualified' | 'Showing' | 'Negotiation' | 'Closed';
@@ -69,6 +76,17 @@ export interface AgentSettings {
   specialties: string[];
   agentCount: number;
   conciergeIntro: string;
+  // Business Knowledge Base
+  termsAndConditions?: string;
+  privacyPolicy?: string;
+  nda?: string;
+  locationHours?: string;
+  serviceAreas?: string;
+  commissionRates?: string;
+  marketingStrategy?: string;
+  teamMembers?: string;
+  awards?: string;
+  legalDisclaimer?: string;
 }
 
 export interface ChatMessage {

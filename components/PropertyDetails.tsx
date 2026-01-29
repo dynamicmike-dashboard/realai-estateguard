@@ -99,6 +99,71 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ property, onDelete, o
                 })}
               />
             </div>
+
+            {/* AI Training Data Fields */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200">
+               <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                 <i className="fa-solid fa-graduation-cap text-gold"></i> AI Training Data
+               </h5>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Waterfront Proximity</label>
+                    <input 
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 mt-1 text-xs font-medium outline-none focus:border-gold"
+                      value={editedProperty.ai_training?.proximityWaterfront || ''}
+                      onChange={e => setEditedProperty({
+                        ...editedProperty, 
+                        ai_training: { ...editedProperty.ai_training, proximityWaterfront: e.target.value }
+                      })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Commute Time</label>
+                    <input 
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 mt-1 text-xs font-medium outline-none focus:border-gold"
+                      value={editedProperty.ai_training?.commuteTime || ''}
+                      onChange={e => setEditedProperty({
+                        ...editedProperty, 
+                        ai_training: { ...editedProperty.ai_training, commuteTime: e.target.value }
+                      })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Schools</label>
+                    <input 
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 mt-1 text-xs font-medium outline-none focus:border-gold"
+                      value={editedProperty.ai_training?.schools || ''}
+                      onChange={e => setEditedProperty({
+                        ...editedProperty, 
+                        ai_training: { ...editedProperty.ai_training, schools: e.target.value }
+                      })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Hospitals</label>
+                    <input 
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 mt-1 text-xs font-medium outline-none focus:border-gold"
+                      value={editedProperty.ai_training?.hospitals || ''}
+                      onChange={e => setEditedProperty({
+                        ...editedProperty, 
+                        ai_training: { ...editedProperty.ai_training, hospitals: e.target.value }
+                      })}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Supermarkets</label>
+                    <input 
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 mt-1 text-xs font-medium outline-none focus:border-gold"
+                      value={editedProperty.ai_training?.supermarkets || ''}
+                      onChange={e => setEditedProperty({
+                        ...editedProperty, 
+                        ai_training: { ...editedProperty.ai_training, supermarkets: e.target.value }
+                      })}
+                    />
+                  </div>
+               </div>
+            </div>
+
           </div>
         </div>
         <div className="flex gap-4">
@@ -190,6 +255,16 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ property, onDelete, o
              <div className="text-[11px] text-slate-600 space-y-2 bg-white p-6 rounded-2xl border border-slate-200/50 shadow-inner">
                <p><span className="font-bold text-slate-900 uppercase">Motivation:</span> {property?.agent_notes?.motivation || 'Verify with HQ'}</p>
                <p><span className="font-bold text-slate-900 uppercase">Access:</span> {property?.agent_notes?.showing_instructions || 'Appointment Required'}</p>
+               
+               {/* AI Training Display */}
+               {property?.ai_training && Object.values(property.ai_training).some(Boolean) && (
+                   <div className="mt-4 pt-4 border-t border-slate-100">
+                       <p className="font-bold text-slate-900 uppercase text-[10px] mb-2 text-gold">AI Location Data:</p>
+                       {property.ai_training.proximityWaterfront && <p><span className="font-bold">Waterfront:</span> {property.ai_training.proximityWaterfront}</p>}
+                       {property.ai_training.schools && <p><span className="font-bold">Schools:</span> {property.ai_training.schools}</p>}
+                       {property.ai_training.commuteTime && <p><span className="font-bold">Commute:</span> {property.ai_training.commuteTime}</p>}
+                   </div>
+               )}
              </div>
            </div>
         </div>
