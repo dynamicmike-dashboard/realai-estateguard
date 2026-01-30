@@ -35,8 +35,41 @@
       "lead_captured": "Piste Capturée !",
       "view_pipeline": "Voir le Pipeline",
       "install_shield": "Installation du Tableau de Bord Agent Élite",
-      "mobile_access": "Configuration Accès Mobile",
-      "native_perf": "Performance Agent Natif"
+      "mobile_access": "Configuration d'Accès Mobile",
+      "native_perf": "Performance d'Agent Natif",
+      "manual_content": {
+        "ingest_title": "1. Ingestion de Propriété",
+        "ingest_desc": "Utilisez l'onglet <b_0>Ingestion</b_0> pour intégrer de nouveaux actifs. Structurez instantanément des listes résidentielles, commerciales ou foncières via Gemini AI.",
+        "concierge_title": "2. Déploiement de Concierge",
+        "concierge_desc": "Accédez à l'onglet <b_0>Concierge</b_0> pour trouver votre code d'intégration web unique. Cela place le chatbot IA sur le site de votre agence.",
+        "rules_title": "3. La Règle des Deux Strikes",
+        "rules_desc": "Le bot est programmé pour répondre à deux questions spécifiques sur n'importe quelle propriété. À la troisième, il pivotera vers la capture sécurisée de prospects."
+      },
+      "privacy_content": {
+        "intro": "EstateGuard utilise une architecture <b_0>Zero-Trust</b_0>. Vos données de propriété et transcriptions sont des actifs privés de votre agence.",
+        "encryption": "<b_0>Chiffrement:</b_0> Standard AES-256 au repos.",
+        "sovereignty": "<b_0>Souveraineté du Modèle:</b_0> Vos données ne sont PAS utilisées pour entraîner des modèles globaux."
+      },
+      "terms_content": {
+        "text": "L'utilisation de la plateforme EstateGuard AI nécessite le respect des réglementations locales sur la divulgation des propriétés et le maintien d'une clé API Gemini personnelle valide."
+      },
+      "legal_content": {
+        "disclaimer": "RealAi EstateGuard est un outil de facilitation piloté par l'IA. Tous les résultats doivent être vérifiés par un professionnel agréé."
+      },
+      "pwa_content": {
+        "ios_title": "iOS (iPhone / iPad)",
+        "ios_step1": "1. Ouvrez cette page dans <b_0>Safari</b_0>.",
+        "ios_step2": "2. Appuyez sur le bouton <b_0>'Partager'</b_0> (carré avec flèche).",
+        "ios_step3": "3. Faites défiler et appuyez sur <b_0>'Sur l'écran d'accueil'</b_0>.",
+        "ios_step4": "4. Ouvrez l'icône de l'application <b_0>EstateGuard</b_0> depuis votre écran d'accueil.",
+        "android_title": "Android (Chrome)",
+        "android_step1": "1. Appuyez sur l'icône <b_0>'Menu'</b_0> (3 points) en haut à droite.",
+        "android_step2": "2. Sélectionnez <b_0>'Installer l'app'</b_0> ou <b_0>'Ajouter à l'écran d'accueil'</b_0>.",
+        "android_step3": "3. Confirmez l'installation et trouvez-la dans votre tiroir.",
+        "desktop_title": "Bureau (Chrome / Edge)",
+        "desktop_text": "Cliquez sur l'icône <b_0>Installer</b_0> dans votre barre d'adresse, OU ouvrez le <b_1>Menu du Navigateur</b_1> et sélectionnez <b_2>\"Installer l'app\"</b_2>.",
+        "pill_title": "CENTRE DE COMMANDE"
+      }
     },
     "footer": {
       "tagline": "EstateGuard AI — Intelligence Synchronisée",

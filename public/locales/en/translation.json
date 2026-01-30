@@ -36,7 +36,40 @@
       "view_pipeline": "View Pipeline",
       "install_shield": "Elite Agent Dashboard Installation",
       "mobile_access": "Mobile Access Setup",
-      "native_perf": "Native Agent Performance"
+      "native_perf": "Native Agent Performance",
+      "manual_content": {
+        "ingest_title": "1. Property Ingestion",
+        "ingest_desc": "Use the <b_0>Ingest</b_0> tab to onboard new assets. Structure residential, commercial, or land listings instantly via Gemini AI.",
+        "concierge_title": "2. Concierge Deployment",
+        "concierge_desc": "Navigate to the <b_0>Concierge</b_0> tab to find your unique website embed code. This places the AI chatbot on your agency site.",
+        "rules_title": "3. The Two-Strike Rule",
+        "rules_desc": "The bot is programmed to answer two specific questions about any property. Upon the third, it will pivot to secure lead capture."
+      },
+      "privacy_content": {
+        "intro": "EstateGuard utilizes <b_0>Zero-Trust</b_0> architecture. Your property data and lead transcripts are your agency's private assets.",
+        "encryption": "<b_0>Encryption:</b_0> AES-256 standard at rest.",
+        "sovereignty": "<b_0>Model Sovereignty:</b_0> Your data is NOT used to train global models."
+      },
+      "terms_content": {
+        "text": "Usage of the EstateGuard AI platform requires compliance with local property disclosure regulations and maintenance of a valid personal Gemini API Key."
+      },
+      "legal_content": {
+        "disclaimer": "RealAi EstateGuard is an AI-driven facilitation tool. All outputs must be verified by a licensed professional."
+      },
+      "pwa_content": {
+        "ios_title": "iOS (iPhone / iPad)",
+        "ios_step1": "1. Open this page in <b_0>Safari</b_0>.",
+        "ios_step2": "2. Tap the <b_0>'Share'</b_0> button (square with arrow).",
+        "ios_step3": "3. Scroll down and tap <b_0>'Add to Home Screen'</b_0>.",
+        "ios_step4": "4. Open the <b_0>EstateGuard</b_0> app icon from your home screen.",
+        "android_title": "Android (Chrome)",
+        "android_step1": "1. Tap the <b_0>'Menu'</b_0> icon (3 dots) top right.",
+        "android_step2": "2. Select <b_0>'Install App'</b_0> or <b_0>'Add to Home Screen'</b_0>.",
+        "android_step3": "3. Confirm the installation and find it in your drawer.",
+        "desktop_title": "Desktop (Chrome / Edge)",
+        "desktop_text": "Click the <b_0>Install</b_0> icon in your address bar, OR open the <b_1>Browser Menu</b_1> and select <b_2>\"Install App\"</b_2>.",
+        "pill_title": "COMMAND CENTER"
+      }
     },
     "footer": {
       "tagline": "EstateGuard AI — Synchronized Intelligence",

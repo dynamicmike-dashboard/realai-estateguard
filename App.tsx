@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import Navigation from './components/Navigation';
 import DashboardStats from './components/DashboardStats';
 import PropertyCard from './components/PropertyCard';
@@ -385,16 +385,16 @@ const App: React.FC = () => {
             content: (
               <div className="space-y-6 text-sm">
                 <section>
-                  <h4 className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-xs">1. Property Ingestion</h4>
-                  <p>Use the <b>Ingest</b> tab to onboard new assets. Structure residential, commercial, or land listings instantly via Gemini AI.</p>
+                  <h4 className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-xs">{t('app.modals.manual_content.ingest_title')}</h4>
+                  <p><Trans i18nKey="app.modals.manual_content.ingest_desc" components={{ b_0: <b /> }} /></p>
                 </section>
                 <section>
-                  <h4 className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-xs">2. Concierge Deployment</h4>
-                  <p>Navigate to the <b>Concierge</b> tab to find your unique website embed code. This places the AI chatbot on your agency site.</p>
+                  <h4 className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-xs">{t('app.modals.manual_content.concierge_title')}</h4>
+                  <p><Trans i18nKey="app.modals.manual_content.concierge_desc" components={{ b_0: <b /> }} /></p>
                 </section>
                 <section>
-                  <h4 className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-xs">3. The Two-Strike Rule</h4>
-                  <p>The bot is programmed to answer two specific questions about any property. Upon the third, it will pivot to secure lead capture.</p>
+                  <h4 className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-xs">{t('app.modals.manual_content.rules_title')}</h4>
+                  <p>{t('app.modals.manual_content.rules_desc')}</p>
                 </section>
               </div>
             )
@@ -405,10 +405,10 @@ const App: React.FC = () => {
             title: t('app.modals.privacy_title'),
             content: (
               <div className="space-y-4 text-sm">
-                <p>EstateGuard utilizes <b>Zero-Trust</b> architecture. Your property data and lead transcripts are your agency's private assets.</p>
+                <p><Trans i18nKey="app.modals.privacy_content.intro" components={{ b_0: <b /> }} /></p>
                 <ul className="list-disc pl-5 space-y-2">
-                  <li><b>Encryption:</b> AES-256 standard at rest.</li>
-                  <li><b>Model Sovereignty:</b> Your data is NOT used to train global models.</li>
+                  <li><Trans i18nKey="app.modals.privacy_content.encryption" components={{ b_0: <b /> }} /></li>
+                  <li><Trans i18nKey="app.modals.privacy_content.sovereignty" components={{ b_0: <b /> }} /></li>
                 </ul>
               </div>
             )
@@ -419,7 +419,7 @@ const App: React.FC = () => {
             title: t('app.modals.terms_title'),
             content: (
               <div className="space-y-4 text-sm">
-                <p>Usage of the EstateGuard AI platform requires compliance with local property disclosure regulations and maintenance of a valid personal Gemini API Key.</p>
+                <p>{t('app.modals.terms_content.text')}</p>
               </div>
             )
           });
@@ -429,7 +429,7 @@ const App: React.FC = () => {
             title: t('app.modals.legal_title'),
             content: (
               <div className="space-y-4 text-sm border-l-4 border-gold pl-4 italic">
-                <p>RealAi EstateGuard is an AI-driven facilitation tool. All outputs must be verified by a licensed professional.</p>
+                <p>{t('app.modals.legal_content.disclaimer')}</p>
                 <p>© 2026 EstateGuard AI.</p>
               </div>
             )
@@ -466,49 +466,49 @@ const App: React.FC = () => {
       <main className="flex-1 overflow-y-auto main-content no-scrollbar flex flex-col">
         {/* PWA Install Notification */}
         <div className="fixed top-6 right-8 z-[60] hidden md:block">
-           <div className="pwa-install-pill" onClick={() => setModalContent({title: 'Elite Agent Dashboard Installation', content: <div className="text-center p-4">
+           <div className="pwa-install-pill" onClick={() => setModalContent({title: t('app.modals.install_shield'), content: <div className="text-center p-4">
                <div className="bg-slate-950 p-10 rounded-[2.5rem] mb-8 border border-gold/20 shadow-2xl">
                   <i className="fa-solid fa-mobile-screen text-6xl text-gold mb-4"></i>
-                  <p className="font-luxury text-2xl font-bold text-white tracking-wide">Mobile Access Setup</p>
-                  <p className="text-sm text-slate-400 mt-2 tracking-tight font-medium uppercase">Native Agent Performance</p>
+                  <p className="font-luxury text-2xl font-bold text-white tracking-wide">{t('app.modals.mobile_access')}</p>
+                  <p className="text-sm text-slate-400 mt-2 tracking-tight font-medium uppercase">{t('app.modals.native_perf')}</p>
                </div>
                
                <div className="space-y-6 text-left">
                   <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
                     <div className="absolute right-0 top-0 h-full w-1 bg-gold"></div>
                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-                       <i className="fa-brands fa-apple text-slate-900"></i> iOS (iPhone / iPad)
+                       <i className="fa-brands fa-apple text-slate-900"></i> {t('app.modals.pwa_content.ios_title')}
                     </p>
                     <ol className="text-xs text-slate-700 leading-relaxed font-semibold space-y-2">
-                      <li>1. Open this page in <b>Safari</b>.</li>
-                      <li>2. Tap the <b>'Share'</b> button <i className="fa-solid fa-arrow-up-from-bracket text-gold mx-1"></i> (square with arrow).</li>
-                      <li>3. Scroll down and tap <b>'Add to Home Screen'</b>.</li>
-                      <li>4. Open the <b>EstateGuard</b> app icon from your home screen.</li>
+                      <li><Trans i18nKey="app.modals.pwa_content.ios_step1" components={{ b_0: <b /> }} /></li>
+                      <li><Trans i18nKey="app.modals.pwa_content.ios_step2" components={{ b_0: <b /> }} /> <i className="fa-solid fa-arrow-up-from-bracket text-gold mx-1"></i></li>
+                      <li><Trans i18nKey="app.modals.pwa_content.ios_step3" components={{ b_0: <b /> }} /></li>
+                      <li><Trans i18nKey="app.modals.pwa_content.ios_step4" components={{ b_0: <b /> }} /></li>
                     </ol>
                   </div>
                   <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
                     <div className="absolute right-0 top-0 h-full w-1 bg-slate-900"></div>
                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-                       <i className="fa-brands fa-android text-emerald-500"></i> Android (Chrome)
+                       <i className="fa-brands fa-android text-emerald-500"></i> {t('app.modals.pwa_content.android_title')}
                     </p>
                     <ol className="text-xs text-slate-700 leading-relaxed font-semibold space-y-2">
-                      <li>1. Tap the <b>'Menu'</b> <i className="fa-solid fa-ellipsis-vertical mx-1"></i> icon (3 dots) top right.</li>
-                      <li>2. Select <b>'Install App'</b> or <b>'Add to Home Screen'</b>.</li>
-                      <li>3. Confirm the installation and find it in your drawer.</li>
+                      <li><Trans i18nKey="app.modals.pwa_content.android_step1" components={{ b_0: <b /> }} /> <i className="fa-solid fa-ellipsis-vertical mx-1"></i></li>
+                      <li><Trans i18nKey="app.modals.pwa_content.android_step2" components={{ b_0: <b /> }} /></li>
+                      <li><Trans i18nKey="app.modals.pwa_content.android_step3" components={{ b_0: <b /> }} /></li>
                     </ol>
                   </div>
                   <div className="bg-slate-900 p-6 rounded-2xl border border-white/5 shadow-sm text-white">
                     <p className="text-[10px] font-black text-gold uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-                       <i className="fa-solid fa-laptop text-gold"></i> Desktop (Chrome / Edge)
+                       <i className="fa-solid fa-laptop text-gold"></i> {t('app.modals.pwa_content.desktop_title')}
                     </p>
                     <p className="text-xs leading-relaxed font-medium">
-                        Click the <b>Install</b> icon <i className="fa-solid fa-download mx-1 text-gold"></i> in your address bar, OR open the <b>Browser Menu</b> <i className="fa-solid fa-ellipsis-vertical mx-1"></i> and select <b>"Install App"</b>.
+                        <Trans i18nKey="app.modals.pwa_content.desktop_text" components={{ b_0: <b />, b_1: <b />, b_2: <b /> }} />
                     </p>
                   </div>
                </div>
            </div>})}>
               <div className="text-left pr-4">
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">COMMAND CENTER</p>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">{t('app.modals.pwa_content.pill_title')}</p>
                 <p className="text-sm text-white font-bold leading-none">{t('app.modals.install_shield')}</p>
               </div>
               <div className="pwa-icon-box shadow-xl shadow-gold/20">
