@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Lead, LeadStatus } from '../types';
 import { DndContext, DragOverlay, useDraggable, useDroppable, DragEndEvent, DragStartEvent, PointerSensor, useSensor, useSensors, TouchSensor } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
@@ -62,6 +63,7 @@ const DraggableLeadCard: React.FC<{ lead: Lead; onSelect: (lead: Lead) => void }
 
 // Droppable Column Wrapper
 const DroppableColumn: React.FC<{ col: LeadStatus; leads: Lead[]; children: React.ReactNode }> = ({ col, leads, children }) => {
+  const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({
     id: col,
   });
@@ -74,7 +76,7 @@ const DroppableColumn: React.FC<{ col: LeadStatus; leads: Lead[]; children: Reac
         {children}
         {leads.length === 0 && (
             <div className="h-20 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-xs">
-            Drop here
+            <span className="opacity-50">{t('kanban.drop_here')}</span>
             </div>
         )}
     </div>
@@ -82,6 +84,7 @@ const DroppableColumn: React.FC<{ col: LeadStatus; leads: Lead[]; children: Reac
 };
 
 const Kanban: React.FC<KanbanProps> = ({ leads, onStatusChange, onSelect, onAddLead }) => {
+  const { t } = useTranslation();
   const [activeId, setActiveId] = useState<string | null>(null);
   
   const sensors = useSensors(
@@ -121,7 +124,7 @@ const Kanban: React.FC<KanbanProps> = ({ leads, onStatusChange, onSelect, onAddL
                 onClick={onAddLead}
                 className="bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-slate-800 shadow-lg"
             >
-                <i className="fa-solid fa-plus text-gold"></i> Add Manual Lead
+                <i className="fa-solid fa-plus text-gold"></i> {t('kanban.add_lead')}
             </button>
         </div>
         <div className="flex gap-6 overflow-x-auto pb-8 min-h-[600px] snap-x snap-mandatory px-4 md:px-0 pt-4">
@@ -130,7 +133,7 @@ const Kanban: React.FC<KanbanProps> = ({ leads, onStatusChange, onSelect, onAddL
             <div className="flex items-center justify-between mb-4 px-2">
                 <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-gold"></span>
-                {col}
+                {t(`kanban.columns.${col.toLowerCase()}`)}
                 </h3>
                 <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full text-[10px] font-bold">
                 {leads.filter(l => l.status === col).length}

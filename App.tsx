@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Navigation from './components/Navigation';
 import DashboardStats from './components/DashboardStats';
 import PropertyCard from './components/PropertyCard';
@@ -50,6 +51,7 @@ const MOCK_PROPERTIES: PropertySchema[] = [
     listing_details: {
       address: "The Glass House, Aspen Peaks",
       price: 18500000, 
+      image_url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1600&q=80",
       video_tour_url: "https://www.w3schools.com/html/mov_bbb.mp4",
       key_stats: {
         bedrooms: 7,
@@ -72,6 +74,7 @@ const MOCK_PROPERTIES: PropertySchema[] = [
     listing_details: {
       address: "Tech Plaza Tower, Austin TX",
       price: 4200000,
+      image_url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80",
       key_stats: { sq_ft: 120000, lot_size: "2.5 Acres", zoning: "Commercial-A" },
       hero_narrative: "Premium class-A office space with LEED Platinum certification."
     },
@@ -82,6 +85,8 @@ const MOCK_PROPERTIES: PropertySchema[] = [
 
 const App: React.FC = () => {
   const { user, loading, signOut } = useAuth(); // Auth Hook
+  const { t } = useTranslation();
+
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [settings, setSettings] = useState<AgentSettings>(INITIAL_SETTINGS);
@@ -217,13 +222,13 @@ const App: React.FC = () => {
                     <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600 text-2xl animate-bounce">
                         <i className="fa-solid fa-check"></i>
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">Lead Captured!</h3>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">{t('app.modals.lead_captured')}</h3>
                     <p className="text-sm text-slate-500 mb-6">You have successfully secured a new prospect for <b>{leadData.property_address}</b>.</p>
                     <button 
                         onClick={() => { setModalContent(null); setActiveTab('leads'); }}
                         className="gold-button w-full py-4 rounded-xl font-bold text-sm shadow-xl"
                     >
-                        View Pipeline
+                        {t('app.modals.view_pipeline')}
                     </button>
                 </div>
             )
@@ -376,7 +381,7 @@ const App: React.FC = () => {
     switch(type) {
       case 'manual':
         setModalContent({
-            title: 'Agent Operating Manual',
+            title: t('app.modals.manual_title'),
             content: (
               <div className="space-y-6 text-sm">
                 <section>
@@ -397,7 +402,7 @@ const App: React.FC = () => {
           break;
       case 'privacy':
         setModalContent({
-            title: 'Privacy & Sovereignty',
+            title: t('app.modals.privacy_title'),
             content: (
               <div className="space-y-4 text-sm">
                 <p>EstateGuard utilizes <b>Zero-Trust</b> architecture. Your property data and lead transcripts are your agency's private assets.</p>
@@ -411,7 +416,7 @@ const App: React.FC = () => {
           break;
       case 'terms':
         setModalContent({
-            title: 'Terms of Engagement',
+            title: t('app.modals.terms_title'),
             content: (
               <div className="space-y-4 text-sm">
                 <p>Usage of the EstateGuard AI platform requires compliance with local property disclosure regulations and maintenance of a valid personal Gemini API Key.</p>
@@ -421,7 +426,7 @@ const App: React.FC = () => {
           break;
       case 'legal':
         setModalContent({
-            title: 'Legal Disclaimer',
+            title: t('app.modals.legal_title'),
             content: (
               <div className="space-y-4 text-sm border-l-4 border-gold pl-4 italic">
                 <p>RealAi EstateGuard is an AI-driven facilitation tool. All outputs must be verified by a licensed professional.</p>
@@ -504,7 +509,7 @@ const App: React.FC = () => {
            </div>})}>
               <div className="text-left pr-4">
                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">COMMAND CENTER</p>
-                <p className="text-sm text-white font-bold leading-none">Install Studio</p>
+                <p className="text-sm text-white font-bold leading-none">{t('app.modals.install_shield')}</p>
               </div>
               <div className="pwa-icon-box shadow-xl shadow-gold/20">
                  <i className="fa-solid fa-mobile-screen"></i>
@@ -528,13 +533,13 @@ const App: React.FC = () => {
                 )}
               </div>
               <h2 className="text-4xl font-luxury font-bold text-slate-950">
-                {activeTab === 'dashboard' && 'Market Command'}
-                {activeTab === 'properties' && 'Portfolio Control'}
-                {activeTab === 'leads' && 'Pipeline Management'}
-                {activeTab === 'settings' && 'Identity & Branding'}
-                {activeTab === 'chat' && 'Concierge Deployment'}
-                {activeTab === 'ingestion' && 'Asset Onboarding'}
-                {activeTab === 'manual' && 'Operating Manual'}
+                {activeTab === 'dashboard' && t('app.headers.dashboard')}
+                {activeTab === 'properties' && t('app.headers.properties')}
+                {activeTab === 'leads' && t('app.headers.leads')}
+                {activeTab === 'settings' && t('app.headers.settings')}
+                {activeTab === 'chat' && t('app.headers.chat')}
+                {activeTab === 'ingestion' && t('app.headers.ingestion')}
+                {activeTab === 'manual' && t('app.headers.manual')}
               </h2>
             </div>
           </header>
@@ -548,7 +553,7 @@ const App: React.FC = () => {
                         <i className="fa-solid fa-magnifying-glass text-slate-400 ml-2"></i>
                         <input 
                             type="text" 
-                            placeholder="Search portfolio by address, price, or status..." 
+                            placeholder={t('app.search_placeholder')} 
                             className="flex-1 bg-transparent outline-none text-slate-700 font-medium placeholder:text-slate-400"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -692,12 +697,12 @@ const App: React.FC = () => {
         <footer className="mt-auto px-10 py-16 bg-slate-950 text-white text-[11px] font-bold border-t border-white/5 uppercase tracking-[0.2em]">
           <div className="flex flex-col md:flex-row justify-between items-center gap-10">
             <div className="flex flex-wrap justify-center gap-12">
-              <button onClick={() => showFooterModal('manual')} className="hover:text-gold transition-colors">Operating Manual</button>
-              <button onClick={() => showFooterModal('privacy')} className="hover:text-gold transition-colors">Privacy Cloud</button>
-              <button onClick={() => showFooterModal('terms')} className="hover:text-gold transition-colors">Terms</button>
-              <button onClick={() => showFooterModal('legal')} className="hover:text-gold transition-colors">Legal Sovereignty</button>
+              <button onClick={() => showFooterModal('manual')} className="hover:text-gold transition-colors">{t('app.footer.manual')}</button>
+              <button onClick={() => showFooterModal('privacy')} className="hover:text-gold transition-colors">{t('app.footer.privacy')}</button>
+              <button onClick={() => showFooterModal('terms')} className="hover:text-gold transition-colors">{t('app.footer.terms')}</button>
+              <button onClick={() => showFooterModal('legal')} className="hover:text-gold transition-colors">{t('app.footer.legal')}</button>
             </div>
-            <p className="text-gold font-luxury text-base lowercase normal-case italic tracking-tight opacity-60">EstateGuard AI — Synchronized Intelligence</p>
+            <p className="text-gold font-luxury text-base lowercase normal-case italic tracking-tight opacity-60">{t('app.footer.tagline')}</p>
           </div>
         </footer>
       </main>

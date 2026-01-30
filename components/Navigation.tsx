@@ -16,13 +16,13 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, brandC
   };
 
   const menuItems = [
-    { id: 'dashboard', icon: 'fa-chart-line', label: 'Command' },
-    { id: 'properties', icon: 'fa-building', label: 'Portfolio' },
+    { id: 'dashboard', icon: 'fa-chart-line', label: t('sidebar.dashboard') },
+    { id: 'properties', icon: 'fa-building', label: t('sidebar.properties') },
     { id: 'leads', icon: 'fa-layer-group', label: t('sidebar.leads') },
-    { id: 'ingestion', icon: 'fa-plus-circle', label: 'Ingest' },
-    { id: 'chat', icon: 'fa-robot', label: 'Concierge' },
-    { id: 'manual', icon: 'fa-book-open', label: 'Manual' },
-    { id: 'settings', icon: 'fa-cog', label: 'Identity' },
+    { id: 'ingestion', icon: 'fa-plus-circle', label: t('sidebar.ingestion') },
+    { id: 'chat', icon: 'fa-robot', label: t('sidebar.chat') },
+    { id: 'manual', icon: 'fa-book-open', label: t('sidebar.manual') },
+    { id: 'settings', icon: 'fa-cog', label: t('sidebar.settings') },
   ];
 
   return (

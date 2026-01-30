@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { chatWithGuard } from '../services/geminiService';
 import { PropertySchema, ChatMessage, Lead, AgentSettings, PropertyTier } from '../types';
 
@@ -9,6 +10,7 @@ interface AgentChatProps {
 }
 
 const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, settings }) => {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -181,7 +183,7 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
     <div className="flex flex-col h-[650px] relative">
       <div className="mb-4 bg-gold/10 border-l-4 border-gold p-4 rounded-r-2xl">
          <p className="text-xs font-bold text-slate-800 italic">
-           "{settings.conciergeIntro || 'Ask our happy assistant about any of our properties 24/7'}"
+           "{settings.conciergeIntro || t('concierge.intro_default')}"
          </p>
       </div>
 
@@ -192,13 +194,13 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
               <i className="fa-solid fa-robot text-xl"></i>
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gold opacity-80">Guard Intelligence</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gold opacity-80">{t('concierge.guard_title')}</p>
               <p className="text-md font-luxury font-bold tracking-tight">{settings.businessName}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
               <span className={`text-[10px] font-bold px-3 py-1 rounded-full border border-slate-800 uppercase ${specificQuestionCount >= 2 ? 'bg-red-900/40 text-red-400 animate-pulse' : 'bg-slate-900 text-slate-500'}`}>
-                 STRIKES: {specificQuestionCount}/2
+                 {t('concierge.strikes')}: {specificQuestionCount}/2
               </span>
           </div>
         </div>
@@ -210,9 +212,9 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
                  <i className="fa-solid fa-shield-halved text-3xl text-gold/30"></i>
               </div>
               <div>
-                  <p className="text-xl font-luxury text-slate-800 font-bold tracking-tight">Sandbox Preview</p>
+                  <p className="text-xl font-luxury text-slate-800 font-bold tracking-tight">{t('concierge.sandbox_preview')}</p>
                   <p className="text-sm max-w-xs mx-auto text-slate-500 leading-relaxed mt-2">
-                     Testing {settings.businessName}'s deployment behavior for <b>{property.listing_details.address}</b> ({property.tier}).
+                     {t('concierge.testing_deployment', { business: settings.businessName, address: property.listing_details.address })} 
                   </p>
               </div>
             </div>
@@ -243,19 +245,19 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
                <div className="flex items-center gap-3 mb-4">
                   <i className="fa-solid fa-user-shield text-gold text-2xl"></i>
                   <div>
-                    <h4 className="font-bold text-slate-900">Priority Viewing Access</h4>
-                    <p className="text-[10px] text-slate-500 uppercase font-black">Secure verification required</p>
+                    <h4 className="font-bold text-slate-900">{t('concierge.priority_access')}</h4>
+                    <p className="text-[10px] text-slate-500 uppercase font-black">{t('concierge.secure_verification')}</p>
                   </div>
                </div>
                <div className="space-y-4">
                   <input 
-                    type="text" placeholder="Your Name" 
+                    type="text" placeholder={t('concierge.placeholders.name')} 
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-gold"
                     value={leadFormData.name}
                     onChange={e => setLeadFormData({...leadFormData, name: e.target.value})}
                   />
                   <input 
-                    type="tel" placeholder="Mobile Number" 
+                    type="tel" placeholder={t('concierge.placeholders.phone')} 
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-gold"
                     value={leadFormData.phone}
                     onChange={e => setLeadFormData({...leadFormData, phone: e.target.value})}
@@ -286,7 +288,7 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
                     disabled={!leadFormData.name || !leadFormData.phone}
                     className="w-full py-4 gold-button rounded-xl font-bold text-xs shadow-lg disabled:opacity-50"
                   >
-                    Request specialist access
+                    {t('concierge.buttons.request_access')}
                   </button>
                </div>
             </div>
@@ -297,7 +299,7 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
           <div className="flex gap-4">
             <input 
               type="text" 
-              placeholder={isGated ? "Security gating active..." : "Ask about specs, price, or private notes..."} 
+              placeholder={isGated ? t('concierge.placeholders.security_active') : t('concierge.placeholders.ask_specs')} 
               className="flex-1 bg-slate-100 px-6 py-4 rounded-2xl outline-none focus:ring-2 focus:ring-gold transition-all text-sm placeholder:text-slate-400 font-medium"
               value={input}
               disabled={isGated}

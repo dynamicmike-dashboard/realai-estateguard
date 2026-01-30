@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, AreaChart, Area } from 'recharts';
 import { PropertySchema, Lead } from '../types';
 
@@ -8,6 +9,7 @@ interface DashboardStatsProps {
 }
 
 const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) => {
+  const { t } = useTranslation();
   // --- REAL DATA AGGREGATION ---
   
   // 1. Calculate Weekly Heatmap Data
@@ -61,38 +63,38 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) =>
       {/* Top Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Portfolio Volume</p>
-          <p className="text-2xl font-bold mt-1">{properties.length} Assets</p>
+          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{t('dashboard.metrics.portfolio_volume')}</p>
+          <p className="text-2xl font-bold mt-1">{properties.length} {t('dashboard.metrics.assets')}</p>
           <div className="mt-2 text-emerald-600 text-xs font-semibold">
-            <i className="fa-solid fa-building mr-1"></i> Active listings
+            <i className="fa-solid fa-building mr-1"></i> {t('dashboard.metrics.active_listings')}
           </div>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Total Leads</p>
+          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{t('dashboard.metrics.total_leads')}</p>
           <p className="text-2xl font-bold mt-1">{leads.length}</p>
           <div className="mt-2 text-gold text-xs font-semibold">
-            <i className="fa-solid fa-fire mr-1"></i> All Time
+            <i className="fa-solid fa-fire mr-1"></i> {t('dashboard.metrics.all_time')}
           </div>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Gated Estates</p>
+          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{t('dashboard.metrics.gated_estates')}</p>
           <p className="text-2xl font-bold mt-1">{estateGuardCount}</p>
           <div className="mt-2 text-slate-400 text-xs font-semibold">
-            High-security protection
+            {t('dashboard.metrics.high_security')}
           </div>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Conversion Rate</p>
+          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{t('dashboard.metrics.conversion_rate')}</p>
           <p className="text-2xl font-bold mt-1">{conversionRate}%</p>
           <div className="mt-2 text-emerald-600 text-xs font-semibold">
-            <i className="fa-solid fa-chart-line mr-1"></i> {closedCount} Closed Deals
+            <i className="fa-solid fa-chart-line mr-1"></i> {closedCount} {t('dashboard.metrics.closed_deals')}
           </div>
         </div>
       </div>
 
       {/* Heatmap Section */}
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-        <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">Lead Acquisition Heatmap (Last 7 Days)</h3>
+        <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">{t('dashboard.heatmap_title')}</h3>
         {/* FIXED: Explicit height and min-height to prevent width(-1) warnings */}
         <div style={{ width: '100%', height: 300, minHeight: 300 }}>
           <ResponsiveContainer width="99%" height={300}>
@@ -115,7 +117,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ properties, leads }) =>
 
       {/* Lead Status Pipeline */}
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-        <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">Lead Pipeline Status</h3>
+        <h3 className="text-sm font-bold text-slate-800 mb-6 uppercase tracking-wider">{t('dashboard.pipeline_title')}</h3>
         <div style={{ width: '100%', height: 300, minHeight: 300 }}>
           <ResponsiveContainer width="99%" height={300}>
             <BarChart data={[

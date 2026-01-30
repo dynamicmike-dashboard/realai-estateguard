@@ -1,5 +1,6 @@
 
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { parsePropertyData, transcribeAudio } from '../services/geminiService';
 import { PropertySchema } from '../types';
 
@@ -9,6 +10,7 @@ apiKey: string; // <-- Add this
 }
 
 const IngestionPortal: React.FC<IngestionPortalProps> = ({ onPropertyAdded, apiKey }) => {
+  const { t } = useTranslation();
   const [activeMode, setActiveMode] = useState<'url' | 'text' | 'voice'>('url');
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,7 @@ const IngestionPortal: React.FC<IngestionPortalProps> = ({ onPropertyAdded, apiK
     setInputValue('');
   } catch (error) {
       console.error(error);
-      alert("Intelligence sync failed. Please verify the source data and try again.");
+      alert(t('app.error_sync_failed') || "Intelligence sync failed. Please verify the source data and try again.");
     } finally {
       setLoading(false);
     }
@@ -78,24 +80,24 @@ const IngestionPortal: React.FC<IngestionPortalProps> = ({ onPropertyAdded, apiK
               <div className="absolute inset-0 border-4 border-gold rounded-full border-t-transparent animate-spin"></div>
               <i className="fa-solid fa-wand-magic-sparkles absolute inset-0 flex items-center justify-center text-gold text-2xl"></i>
            </div>
-           <h3 className="text-xl font-luxury font-bold text-slate-900">Synchronizing Asset Intelligence</h3>
-           <p className="text-slate-500 text-sm mt-2 animate-pulse">Gemini 3 Flash Pro is structuring your listing data...</p>
+           <h3 className="text-xl font-luxury font-bold text-slate-900">{t('ingestion.sync_title')}</h3>
+           <p className="text-slate-500 text-sm mt-2 animate-pulse">{t('ingestion.sync_subtitle')}</p>
         </div>
       )}
 
       <div className="mb-12 text-center">
-        <span className="text-[10px] font-black text-gold uppercase tracking-[0.3em] mb-4 block">Asset Orchestration</span>
-        <h2 className="text-3xl font-luxury font-bold text-slate-900 mb-3">Onboard Your Elite Portfolio</h2>
+        <span className="text-[10px] font-black text-gold uppercase tracking-[0.3em] mb-4 block">{t('ingestion.orchestration')}</span>
+        <h2 className="text-3xl font-luxury font-bold text-slate-900 mb-3">{t('ingestion.onboard_title')}</h2>
         <p className="text-slate-500 max-w-lg mx-auto text-sm leading-relaxed">
-           Transform scattered data into high-fidelity, secure property schemas with zero manual entry.
+           {t('ingestion.onboard_desc')}
         </p>
       </div>
 
       <div className="flex flex-wrap justify-center gap-4 mb-12">
         {[
-          { id: 'url', icon: 'fa-globe', label: 'Web Scraper' },
-          { id: 'text', icon: 'fa-file-lines', label: 'Direct Entry' },
-          { id: 'voice', icon: 'fa-microphone-lines', label: 'Agent Voice Note' },
+          { id: 'url', icon: 'fa-globe', label: t('ingestion.modes.url') },
+          { id: 'text', icon: 'fa-file-lines', label: t('ingestion.modes.text') },
+          { id: 'voice', icon: 'fa-microphone-lines', label: t('ingestion.modes.voice') },
         ].map((mode) => (
           <button
             key={mode.id}
@@ -115,12 +117,12 @@ const IngestionPortal: React.FC<IngestionPortalProps> = ({ onPropertyAdded, apiK
       <div className="space-y-8">
         {activeMode === 'url' && (
           <div className="space-y-3 animate-in slide-in-from-bottom-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Listing URL Source</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{t('ingestion.labels.url_source')}</label>
             <div className="relative">
                <i className="fa-solid fa-link absolute left-6 top-1/2 -translate-y-1/2 text-slate-300"></i>
                <input 
                   type="text" 
-                  placeholder="https://exclusive-estates.com/listing/3409" 
+                  placeholder={t('ingestion.placeholders.url')}  
                   className="w-full pl-14 pr-6 py-5 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all text-sm font-medium bg-slate-50/50"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
@@ -131,10 +133,10 @@ const IngestionPortal: React.FC<IngestionPortalProps> = ({ onPropertyAdded, apiK
 
         {activeMode === 'text' && (
           <div className="space-y-3 animate-in slide-in-from-bottom-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Property Manifest</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{t('ingestion.labels.manifest')}</label>
             <textarea 
               rows={8}
-              placeholder="Paste MLS data, internal briefs, or market reports here..." 
+              placeholder={t('ingestion.placeholders.text')}  
               className="w-full px-6 py-5 rounded-3xl border border-slate-200 focus:ring-2 focus:ring-gold focus:border-transparent outline-none transition-all resize-none text-sm font-medium bg-slate-50/50"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -153,9 +155,9 @@ const IngestionPortal: React.FC<IngestionPortalProps> = ({ onPropertyAdded, apiK
               <i className={`fa-solid ${isRecording ? 'fa-stop' : 'fa-microphone'} text-3xl`}></i>
             </button>
             <p className="mt-8 font-luxury font-bold text-slate-800 text-lg">
-              {isRecording ? 'Listening for listing details...' : 'Describe your new asset'}
+              {isRecording ? t('ingestion.labels.listening') : t('ingestion.labels.describe')}
             </p>
-            <p className="text-slate-400 text-xs mt-2 uppercase tracking-widest">Voice-to-Schema Sync</p>
+            <p className="text-slate-400 text-xs mt-2 uppercase tracking-widest">{t('ingestion.labels.voice_sync')}</p>
             
             {inputValue && (
               <div className="mt-10 w-full p-6 bg-white border border-slate-100 rounded-3xl shadow-sm italic text-slate-600 text-sm leading-relaxed border-l-4 border-gold">
@@ -171,7 +173,7 @@ const IngestionPortal: React.FC<IngestionPortalProps> = ({ onPropertyAdded, apiK
           className="w-full py-5 gold-button rounded-2xl font-bold text-sm shadow-2xl shadow-gold/20 hover:scale-[1.01] disabled:opacity-30 disabled:hover:scale-100 transition-all flex items-center justify-center gap-3 active:scale-95"
         >
           <i className="fa-solid fa-shield-halved"></i>
-          SECURE SYNC TO PORTFOLIO
+          {t('ingestion.buttons.secure_sync')}
         </button>
       </div>
     </div>
