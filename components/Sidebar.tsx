@@ -15,9 +15,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   };
 
   const menuItems = [
-    { id: 'dashboard', icon: 'fa-chart-line', label: t('sidebar.dashboard') },
+    { id: 'dashboard', icon: 'fa-chart-line', label: 'COMMAND DEBUG' },
     { id: 'properties', icon: 'fa-home', label: t('sidebar.properties') },
-    { id: 'leads', icon: 'fa-user-tie', label: t('sidebar.leads') },
+    { id: 'leads', icon: 'fa-user-tie', label: t('sidebar.leads_v2') },
     { id: 'ingestion', icon: 'fa-file-import', label: t('sidebar.ingestion') },
     { id: 'chat', icon: 'fa-shield-halved', label: t('sidebar.chat') },
   ];
