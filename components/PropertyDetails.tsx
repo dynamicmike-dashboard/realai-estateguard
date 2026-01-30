@@ -227,7 +227,7 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({ property, onDelete, o
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="aspect-video rounded-[2rem] overflow-hidden shadow-2xl border border-slate-100 bg-slate-200 relative group">
           <img 
-            src={property.listing_details.image_url || `https://picsum.photos/seed/${property.property_id}/800/600`} 
+            src={property.listing_details.image_url || `https://placehold.co/800x600/1e293b/d4af37?text=EstateGuard+Detail+${property.property_id}`} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
             alt="Property Hero" 
             onError={(e) => (e.currentTarget.src = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80')}

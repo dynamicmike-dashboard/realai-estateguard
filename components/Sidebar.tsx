@@ -69,7 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
 
       <div className="mt-auto pt-6 border-t border-slate-800">
         <div className="flex items-center gap-3 px-2">
-          <img src="https://picsum.photos/40/40?grayscale" className="rounded-full w-10 h-10 border border-slate-700" alt="Agent" />
+          <img src="https://ui-avatars.com/api/?name=Agent&background=d4af37&color=0f172a" className="rounded-full w-10 h-10 border border-slate-700" alt="Agent" />
           <div className="overflow-hidden">
             <p className="text-sm font-semibold truncate">Westlake Premier</p>
             <p className="text-xs text-slate-500 truncate">{t('sidebar.agent_role')}</p>

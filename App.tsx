@@ -10,7 +10,7 @@ import Settings from './components/Settings';
 import PropertyDetails from './components/PropertyDetails';
 import UserManual from './components/UserManual';
 import LeadDetailsModal from './components/LeadDetailsModal';
-import LeadDetailsModal from './components/LeadDetailsModal'; // Added import
+import AddLeadModal from './components/AddLeadModal';
 import { PropertySchema, Lead, PropertyTier, AgentSettings, LeadStatus } from './types';
 
 // Auth & Database Imports
@@ -93,6 +93,7 @@ const App: React.FC = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [notifications, setNotifications] = useState(0);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
 
   // FIXED: Mapping helper to match 'name' and 'phone' columns in Supabase schema
   const mapLead = (d: any): Lead => ({
@@ -579,13 +580,28 @@ const App: React.FC = () => {
             )}
             {activeTab === 'leads' && (
                 <>
-                  <Kanban leads={leads} onStatusChange={handleStatusChange} onSelect={setSelectedLead} />
+                  <Kanban 
+                    leads={leads} 
+                    onStatusChange={handleStatusChange} 
+                    onSelect={setSelectedLead} 
+                    onAddLead={() => setIsAddLeadOpen(true)}
+                  />
                   {selectedLead && (
                       <LeadDetailsModal 
                           lead={selectedLead} 
                           onClose={() => setSelectedLead(null)} 
                           onUpdate={updateLead}
                           onDelete={deleteLead}
+                      />
+                  )}
+                  {isAddLeadOpen && (
+                      <AddLeadModal
+                          properties={properties}
+                          onClose={() => setIsAddLeadOpen(false)}
+                          onSave={(leadData) => {
+                              handleCaptureLead(leadData, true); // true = silent capture (no popup)
+                              setIsAddLeadOpen(false);
+                          }}
                       />
                   )}
                 </>
