@@ -95,6 +95,21 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
     
     const userMsg: ChatMessage = { role: 'user', text: input };
     
+    // Check for affirmative agreement to a solicitation
+    const lastBotMsg = messages.length > 0 ? messages[messages.length - 1].text.toLowerCase() : "";
+    const isSolicitation = lastBotMsg.includes("leave your number") || lastBotMsg.includes("get back to you") || lastBotMsg.includes("ask the agent");
+    const isAffirmative = /^(ok|yes|sure|yeah|please|correct|right)$/i.test(input.trim());
+    
+    if (isSolicitation && isAffirmative) {
+       setMessages(prev => [...prev, userMsg, { 
+        role: 'model', 
+        text: "Great. To get the agent in touch, may I have your name please?" 
+      }]);
+      setCollectionStep('NAME');
+      setInput('');
+      return;
+    }
+
     // Check for phone number FIRST to trigger interception
     // Quick-capture: specific US format OR generic 7-15 digit sequences for Intl/Test
     const phoneMatch = input.match(/(\+\d{1,3}[\s-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/) || input.match(/\d{5,15}/);
