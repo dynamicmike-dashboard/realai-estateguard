@@ -1,6 +1,7 @@
 -- 1. Add missing columns to 'leads' table to match Application logic
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id);
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS chat_summary TEXT;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS email TEXT;
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS property_address TEXT;
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS property_id TEXT; -- For custom IDs like 'EG-770'
 

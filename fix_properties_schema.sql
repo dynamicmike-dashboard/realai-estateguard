@@ -7,6 +7,8 @@ ADD COLUMN IF NOT EXISTS property_id TEXT;
 
 -- 2. Ensure all other columns exist (Just in case)
 ALTER TABLE public.properties 
+ADD COLUMN IF NOT EXISTS category TEXT,
+ADD COLUMN IF NOT EXISTS transaction_type TEXT,
 ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id),
 ADD COLUMN IF NOT EXISTS address TEXT,
 ADD COLUMN IF NOT EXISTS price NUMERIC,

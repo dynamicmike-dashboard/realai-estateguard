@@ -15,6 +15,11 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
   const [specificQuestionCount, setSpecificQuestionCount] = useState(0);
   const [isGated, setIsGated] = useState(false);
   const [leadFormData, setLeadFormData] = useState({ name: '', phone: '', comm: 'WhatsApp', time: 'ASAP' });
+  
+  // New State for Conversational Capture
+  const [collectionStep, setCollectionStep] = useState<'IDLE' | 'NAME' | 'MODE' | 'EMAIL' | 'TIME'>('IDLE');
+  const [tempLeadData, setTempLeadData] = useState<{name?: string; phone?: string; comm?: string; email?: string; time?: string}>({});
+  
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,10 +28,88 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
     }
   }, [messages, isTyping, isGated]);
 
+  const processCollectionStep = (userInput: string) => {
+    const newMessages = [...messages, { role: 'user', text: userInput } as ChatMessage];
+    
+    let nextStep = collectionStep;
+    let botResponse = "";
+    
+    switch (collectionStep) {
+      case 'NAME':
+        setTempLeadData(prev => ({ ...prev, name: userInput }));
+        botResponse = `Thanks ${userInput}. How would you prefer to be contacted? (Phone, Email, Text, WhatsApp?)`;
+        nextStep = 'MODE';
+        break;
+        
+      case 'MODE':
+        const mode = userInput;
+        setTempLeadData(prev => ({ ...prev, comm: mode }));
+        if (mode.toLowerCase().includes('email')) {
+          botResponse = "Great. What is your email address?";
+          nextStep = 'EMAIL';
+        } else {
+          botResponse = "Got it. When is the best time for someone to reach out?";
+          nextStep = 'TIME';
+        }
+        break;
+
+      case 'EMAIL':
+        setTempLeadData(prev => ({ ...prev, email: userInput }));
+        botResponse = "Thanks. And when is the best time for the agent to connect?";
+        nextStep = 'TIME';
+        break;
+        
+      case 'TIME':
+        setTempLeadData(prev => ({ ...prev, time: userInput }));
+        botResponse = "Perfect. I will pass your details to the property agent immediately and ask them to connect with you as discussed. Is there anything else I can help you with at this time?";
+        
+        // Finalize Capture
+        const finalData = { ...tempLeadData, time: userInput };
+        onLeadCaptured({
+          name: finalData.name || 'DIRECT LEAD',
+          phone: finalData.phone,
+          property_id: property.property_id,
+          property_address: property.listing_details.address,
+          email: finalData.email,
+          notes: [`Prefers ${finalData.comm || 'contact'} at ${userInput}`, `Email: ${finalData.email || 'N/A'}`]
+        }, true); // Silent capture as we are handling the UI confirmation
+        
+        nextStep = 'IDLE';
+        break;
+    }
+
+    setMessages([...newMessages, { role: 'model', text: botResponse }]);
+    setCollectionStep(nextStep);
+    setInput('');
+    setIsTyping(false);
+  };
+
   const handleSend = async () => {
     if (!input.trim() || isGated) return;
+
+    // Intercept for Collection Flow
+    if (collectionStep !== 'IDLE') {
+      processCollectionStep(input);
+      return;
+    }
     
     const userMsg: ChatMessage = { role: 'user', text: input };
+    
+    // Check for phone number FIRST to trigger interception
+    // Quick-capture: specific US format OR generic 7-15 digit sequences for Intl/Test
+    const phoneMatch = input.match(/(\+\d{1,3}[\s-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/) || input.match(/\d{5,15}/);
+    
+    if (phoneMatch) {
+      setMessages(prev => [...prev, userMsg, { 
+        role: 'model', 
+        text: "I've noted that number. May I have your name so I know who to ask for?" 
+      }]);
+      setTempLeadData({ phone: phoneMatch[0] });
+      setCollectionStep('NAME');
+      setInput('');
+      return; 
+    }
+
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsTyping(true);
@@ -59,16 +142,6 @@ const AgentChat: React.FC<AgentChatProps> = ({ property, onLeadCaptured, setting
         setIsGated(true);
       }
 
-      // Quick-capture: specific US format OR generic 7-15 digit sequences for Intl/Test
-      const phoneMatch = input.match(/(\+\d{1,3}[\s-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/) || input.match(/\d{5,15}/);
-      if (phoneMatch) {
-        onLeadCaptured({
-          name: "Direct Sandbox Lead",
-          phone: phoneMatch[0],
-          property_id: property.property_id,
-          property_address: property.listing_details.address,
-        }, true); // Silent mode: true
-      }
     } catch (e) {
       setMessages(prev => [...prev, { role: 'model', text: "Sorry, the office is very busy today, please continue to enjoy browsing our portfolio." }]);
     } finally {

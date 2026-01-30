@@ -57,6 +57,7 @@ export interface Lead {
   id: string;
   name: string;
   phone: string;
+  email?: string; // Added captured email
   financing_status: 'Cash' | 'Lender' | 'Unverified';
   property_id: string;
   property_address: string;
