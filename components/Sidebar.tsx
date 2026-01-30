@@ -15,9 +15,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   };
 
   const menuItems = [
-    { id: 'dashboard', icon: 'fa-chart-line', label: 'COMMAND DEBUG' },
+    { id: 'dashboard', icon: 'fa-chart-line', label: t('sidebar.dashboard') },
     { id: 'properties', icon: 'fa-home', label: t('sidebar.properties') },
-    { id: 'leads', icon: 'fa-user-tie', label: t('sidebar.leads_v2') },
+    { id: 'leads', icon: 'fa-user-tie', label: t('sidebar.leads') },
     { id: 'ingestion', icon: 'fa-file-import', label: t('sidebar.ingestion') },
     { id: 'chat', icon: 'fa-shield-halved', label: t('sidebar.chat') },
   ];
@@ -33,14 +33,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
         </div>
         
         {/* Language Switcher */}
-        <div className="flex gap-2 justify-center bg-slate-800 p-1 rounded-lg">
-            {['en', 'es', 'fr'].map((lng) => (
+        <div className="flex gap-1 justify-center bg-slate-800 p-1.5 rounded-xl">
+            {[
+              { code: 'en', label: '🇺🇸 EN' },
+              { code: 'es', label: '🇪🇸 ES' },
+              { code: 'fr', label: '🇫🇷 FR' }
+            ].map(({ code, label }) => (
                 <button 
-                  key={lng}
-                  onClick={() => changeLanguage(lng)}
-                  className={`text-[10px] font-bold uppercase px-2 py-1 rounded transition-colors ${i18n.language === lng ? 'bg-indigo-500 text-white' : 'text-slate-500 hover:text-white'}`}
+                  key={code}
+                  onClick={() => changeLanguage(code)}
+                  className={`text-[11px] font-bold px-2 py-1.5 rounded-lg transition-all ${i18n.language === code ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
                 >
-                    {lng}
+                    {label}
                 </button>
             ))}
         </div>
