@@ -14,8 +14,11 @@ const getApiKey = (passedKey?: string) => {
 const hydrateInstruction = (settings: AgentSettings) => {
   return ESTATE_GUARD_SYSTEM_INSTRUCTION
     .replace(/{BUSINESS_NAME}/g, settings.businessName || "our agency")
-    .replace(/{BUSINESS_ADDRESS}/g, settings.businessAddress || "our hq")
-    .replace(/{SPECIALTIES}/g, settings.specialties?.join(", ") || "Luxury Real Estate");
+    .replace(/{BUSINESS_ADDRESS}/g, settings.businessAddress || "our headquarters")
+    .replace(/{SPECIALTIES}/g, settings.specialties?.join(", ") || "Luxury Real Estate")
+    .replace(/{AWARDS}/g, settings.awards || "Top Rated Agency")
+    .replace(/{MARKETING_STRATEGY}/g, settings.marketingStrategy || "Client-first approach")
+    .replace(/{TEAM_MEMBERS}/g, settings.teamMembers || "Our elite team of specialists");
 };
 
 // --- RESILIENT JSON EXTRACTION ---
