@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface NavigationProps {
   activeTab: string;
@@ -8,10 +9,11 @@ interface NavigationProps {
 }
 
 const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, brandColor = '#d4af37', onSignOut }) => {
+  const { t } = useTranslation();
   const menuItems = [
     { id: 'dashboard', icon: 'fa-chart-line', label: 'Command' },
     { id: 'properties', icon: 'fa-building', label: 'Portfolio' },
-    { id: 'leads', icon: 'fa-layer-group', label: 'Qualified' },
+    { id: 'leads', icon: 'fa-layer-group', label: t('sidebar.leads') },
     { id: 'ingestion', icon: 'fa-plus-circle', label: 'Ingest' },
     { id: 'chat', icon: 'fa-robot', label: 'Concierge' },
     { id: 'manual', icon: 'fa-book-open', label: 'Manual' },
