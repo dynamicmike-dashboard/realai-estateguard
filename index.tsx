@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { AuthProvider } from './components/Auth/AuthProvider';
+import './i18n'; // Initialize i18n
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

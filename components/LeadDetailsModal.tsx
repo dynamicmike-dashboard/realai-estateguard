@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Lead, LeadStatus } from '../types';
 
 interface LeadDetailsModalProps {
@@ -11,6 +12,7 @@ interface LeadDetailsModalProps {
 const STATUS_OPTIONS: LeadStatus[] = ['New', 'Discovery', 'Qualified', 'Showing', 'Negotiation', 'Closed', 'Archived'];
 
 const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({ lead, onClose, onUpdate, onDelete }) => {
+  const { t } = useTranslation();
   const [note, setNote] = useState('');
   const [isEditing, setIsEditing] = useState(false);
 
@@ -78,13 +80,20 @@ const LeadDetailsModal: React.FC<LeadDetailsModalProps> = ({ lead, onClose, onUp
             {/* Contact Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Phone</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('leads.phone')}</label>
                     <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-100">
                         <i className="fa-solid fa-phone text-gold"></i>
                         <span className="font-mono text-sm font-bold text-slate-700">{lead.phone}</span>
                     </div>
                 </div>
                 <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('leads.email')}</label>
+                    <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-100">
+                        <i className="fa-solid fa-envelope text-indigo-500"></i>
+                        <span className="font-mono text-sm font-bold text-slate-700 select-all">{lead.email || 'N/A'}</span>
+                    </div>
+                </div>
+                <div className="space-y-2 md:col-span-2">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Property Interest</label>
                     <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-100">
                         <i className="fa-solid fa-house text-emerald-500"></i>

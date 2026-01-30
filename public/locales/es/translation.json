@@ -1,0 +1,17 @@
+{
+  "sidebar": {
+    "dashboard": "Centro de Comando",
+    "properties": "Propiedades",
+    "leads": "Clientes Potenciales",
+    "ingestion": "Portal de Ingestión",
+    "chat": "Prueba de Guardia",
+    "agent_role": "Agente de Nivel Élite"
+  },
+  "leads": {
+    "email": "Correo",
+    "phone": "Teléfono",
+    "notes": "Notas",
+    "copy": "Copiar",
+    "details_title": "Inteligencia de Cliente"
+  }
+}
