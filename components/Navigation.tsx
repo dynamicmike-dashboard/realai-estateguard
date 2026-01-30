@@ -9,7 +9,12 @@ interface NavigationProps {
 }
 
 const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, brandColor = '#d4af37', onSignOut }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
+
   const menuItems = [
     { id: 'dashboard', icon: 'fa-chart-line', label: 'Command' },
     { id: 'properties', icon: 'fa-building', label: 'Portfolio' },
@@ -28,6 +33,23 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, brandC
             <i className="fa-solid fa-shield-halved text-slate-950 text-xl"></i>
           </div>
           <h1 className="text-xl font-luxury font-bold tracking-tight">RealAi</h1>
+        </div>
+
+        {/* Language Switcher */}
+        <div className="flex gap-1 justify-center bg-slate-900 p-1.5 rounded-xl mb-6 mx-2 border border-slate-800">
+            {[
+              { code: 'en', label: '🇺🇸' },
+              { code: 'es', label: '🇪🇸' },
+              { code: 'fr', label: '🇫🇷' }
+            ].map(({ code, label }) => (
+                <button 
+                  key={code}
+                  onClick={() => changeLanguage(code)}
+                  className={`flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-center ${i18n.language === code ? 'bg-gold text-slate-950 shadow-md' : 'text-slate-500 hover:text-white hover:bg-slate-800'}`}
+                >
+                    {label} {code.toUpperCase()}
+                </button>
+            ))}
         </div>
 
         <nav className="flex-1 space-y-1.5">
