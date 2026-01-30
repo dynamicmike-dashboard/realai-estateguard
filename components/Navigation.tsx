@@ -36,7 +36,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, brandC
         </div>
 
         {/* Language Switcher */}
-        <div className="flex gap-1 justify-center bg-slate-900 p-1.5 rounded-xl mb-6 mx-2 border border-slate-800">
+        <div className="flex gap-1 justify-center bg-slate-800/80 p-1.5 rounded-xl mb-6 mx-2 border border-slate-700/50">
             {[
               { code: 'en', label: '🇺🇸' },
               { code: 'es', label: '🇪🇸' },
@@ -45,7 +45,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab, brandC
                 <button 
                   key={code}
                   onClick={() => changeLanguage(code)}
-                  className={`flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-center ${i18n.language === code ? 'bg-gold text-slate-950 shadow-md' : 'text-slate-500 hover:text-white hover:bg-slate-800'}`}
+                  className={`flex-1 text-[10px] font-bold py-1.5 rounded-lg transition-all text-center ${i18n.language === code ? 'bg-gold text-slate-950 shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
                 >
                     {label} {code.toUpperCase()}
                 </button>
